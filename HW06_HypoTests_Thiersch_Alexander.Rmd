@@ -1,10 +1,11 @@
 ---
 title: "Intro to DS - Hypothesis Tests, T-test, 2-sample T-test, ANOVA, Chi-squared"
-author: "Edwin Lo, GWU Intro to Data Science DATS 6101"
+author: "Alexander Thiersch, GWU Intro to Data Science DATS 6101"
 # date: "today"
 date: "`r Sys.Date()`"
 output:
   html_document:
+    theme: cerulean
     code_folding: hide
     number_sections: false
     toc: yes
@@ -19,6 +20,10 @@ output:
 # some of common options (and the defaults) are: 
 # include=T, eval=T, echo=T, results='hide'/'asis'/'markup',..., collapse=F, warning=T, message=T, error=T, cache=T, fig.width=6, fig.height=4, fig.dim=c(6,4) #inches, fig.align='left'/'center','right', 
 library(ezids)
+library(ggplot2)
+library(ggpubr)
+library(kableExtra)
+library(xtable)
 # knitr::opts_chunk$set(warning = F, results = "markup", message = F)
 knitr::opts_chunk$set(warning = F, results = "hide", message = F)
 options(scientific=T, digits = 3) 
@@ -41,69 +46,208 @@ The variables in the dataset are:
 ## Grad School Admissions
 
 
-### Question 1
+### Question 1: Import Dataset
 
 **Same as last homework, import the dataset as Adata, and make sure the data type for the variables are set properly for categorical variables.**
 
-```{r q01}
-Adata <- data.frame(read.csv( ))
+```{r, results ='asis'}
+Adata <- data.frame(read.csv("~/Documents/My6101Work/LogRegAdmit.csv"))
+
+xkabledply(head(Adata), title = "Adata Dataset")
 ```
 
-Answer answer answer. Lorem ipsum dolor sit amet...
 
-### Question 2
+### Question 2: Remove Outliers
 
 **Use the `outlierKD2()` function, remove the outliers for gre and gpa. Save the resulting dataframe as Adata2. You will need to do this in two steps, removing outliers for one variable at a time. How many NA values are in gre and in gpa with the resulting dataframe *Adata2*? **
 
-Answer answer answer. Lorem ipsum dolor sit amet...
+There were a total of 5 outliers removed. 1 outlier was removed from the gre variable, which is an NA value. 4 outliers were removed from gpa variable, which are now all NA values. 
 
 
+```{r}
+#Removing outliers from gre and gpa
+Adata2<-outlierKD2(Adata, gre, rm = TRUE, boxplt = FALSE, histogram = FALSE, qqplt = FALSE)
+Adata2<-outlierKD2(Adata2, gpa, rm = TRUE, boxplt = FALSE, histogram = FALSE, qqplt = FALSE)
 
-### Question 3
+data.frame(Adata2)
+
+#View(Adata2)
+
+#Sum of na values due to the removal of outliers 
+sum(is.na(Adata2$gpa))
+sum(is.na(Adata2$gre))
+
+```
+
+
+```{r, results ='asis'}
+xkabledply(head(Adata2), title = "Adata2 Dataset")
+```
+
+
+### Question 3: Subset Admissions
 
 **Like last time, separate the two subsets again, for admitted and rejected. **
 
-Answer answer answer. Lorem ipsum dolor sit amet...
+```{r, results ='asis'}
+#Subsetting data for admitted and rejected applicants
+admit_student<-subset(Adata2, admit==1)
+reject_student<-subset(Adata2, admit==0)
+
+xkabledply(head(admit_student), title = "Admitted Applicants Dataset")
+
+xkabledply(head(reject_student), title = "Rejected Applicants Dataset")
+
+```
 
 
-
-### Question 4
+### Question 4: Histograms and QQ-Plots
 
 **We were a little careless last time. Let us check for normality on the numerical variables. Let us use histogram (use `ggplot()`) and QQ-plot (use `qqnorm()`) to check the quantitative variables for the admitted and rejected subsets. Make a brief comment on the results. **
 
-Answer answer answer. Lorem ipsum dolor sit amet...
+The histograms and qq-plots for admitted applicants gpa and gre scores both exhibit left tailed skewness. This is indicated by the asymmetric distribution of the gpa and gre scores in the histograms, where the higher densities of gpa and gre are clustered on the right side of the histograms. Additionally, the qq-plots are tailed in the top right of the graph and dip below the straight line. This deviation from the straight line indicates left-tailed skewness. This type of distribution expected as admitted applicants are more likely to have higher gpa and gre scores, leading to a skewed distribution.
+
+
+The histograms and qq-plots for rejected applicants gpa and gre scores exhibit a relatively normal distribution. This is indicated by the fairly even distribution of the gpa and gre scores in the histograms. The data is not perfectly normally distributed, but the even kernel density plots overlaid on the histograms and the lack of tails or strong deviation from the straight line in the qq-plots, suggest a normal distribution. This type of distribution is somewhat unexpected because rejected applicants would likely have a higher frequency of lower gre and gpa scores, meaning that the distribution would be right-tailed skewed.
+
+
+```{r}
+par(mfrow=c(2,2))
+
+#Histogram for Admitted Students
+hist_admit_gpa<-ggplot(admit_student, aes(x=gpa)) +  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+ geom_density(alpha=.2, fill="#00FF00") + ggtitle("Histogram of Admitted GPA") + xlab("GPA") + ylab("Density") 
+
+hist_admit_gre<-ggplot(admit_student, aes(x=gre)) +  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+ geom_density(alpha=.2, fill="#00FF00") + ggtitle("Histogram of Admitted GRE") + xlab("GRE") + ylab("Density")
+
+#QQnorm plots for Admitted Students
+qq_admit_gpa<-ggplot(admit_student, aes(sample = gpa)) +
+  stat_qq() +
+  stat_qq_line(col = "red") +
+  ggtitle("QQ-Plot of GPA for Admitted") + xlab("Theoretical Quantiles") + ylab("Sample Quantiles")
+
+qq_admit_gre<-ggplot(admit_student, aes(sample = gre)) +
+  stat_qq() +
+  stat_qq_line(col = "red") +
+  ggtitle("QQ-Plot of GRE for Admitted") + xlab("Theoretical Quantiles") + ylab("Sample Quantiles")
+
+figure_admit <- ggarrange(hist_admit_gpa, hist_admit_gre, qq_admit_gpa, qq_admit_gre,
+                    labels = c("A", "B", "C", "D"),
+                    ncol = 2, nrow = 2)
+figure_admit
+
+
+```
 
 
 
-### Question 5
+```{r}
+par(mfrow=c(2,2))
+
+#Histogram for Admitted Students
+hist_reject_gpa<-ggplot(reject_student, aes(x=gpa)) +  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+ geom_density(alpha=.2, fill="#ff0000") + ggtitle("Histogram of Rejected GPA") + xlab("GPA") + ylab("Density") 
+
+hist_reject_gre<-ggplot(reject_student, aes(x=gre)) +  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+ geom_density(alpha=.2, fill="#ff0000") + ggtitle("Histogram of Rejected GRE") + xlab("GRE") + ylab("Density")
+
+#QQnorm plots for Admitted Students
+qq_reject_gpa<-ggplot(reject_student, aes(sample = gpa)) +
+  stat_qq() +
+  stat_qq_line(col = "red") +
+  ggtitle("QQ-Plot of GPA for Rejected") + xlab("Theoretical Quantiles") + ylab("Sample Quantiles")
+
+qq_reject_gre<-ggplot(reject_student, aes(sample = gre)) +
+  stat_qq() +
+  stat_qq_line(col = "red") +
+  ggtitle("QQ-Plot of GRE for Rejected") + xlab("Theoretical Quantiles") + ylab("Sample Quantiles")
+
+figure_reject <- ggarrange(hist_reject_gpa, hist_reject_gre, qq_reject_gpa, qq_reject_gre,
+                    labels = c("A", "B", "C", "D"),
+                    ncol = 2, nrow = 2)
+figure_reject
+
+
+
+
+```
+
+
+
+### Question 5: Two-Sample t-Tests
 
 **Does the two subgroups have different gre average and gpa average? Use the standard $\alpha$ = 0.05. What are the p-values for the test on gre and gpa? What are your conclusions from the tests? **
 
-Answer answer answer. Lorem ipsum dolor sit amet...
+The two-sample t-test for the gre variable between admitted and rejected applicants suggests that the subgroups have a different mean gre as indicated by the small p-value of 1.0e-04. This means that the null hypothesis can be rejected in favor of the alternative hypothesis, indicating that admitted and rejected applicants have different mean gre scores.
+
+The two-sample t-test for the gpa variable between admitted and rejected applicants suggests that the subgroups have a different mean gpa as indicated by the small p-value of 5.0e-04. This means that the null hypothesis can be rejected in favor of the alternative hypothesis, indicating that admitted and rejected applicants have different mean gpa scores.
+
+
+```{r}
+#Two Sampled T-Test for GRE of Admitted and Rejected
+ttest2sample_gre = t.test(admit_student$gre,reject_student$gre)
+ttest2sample_gre
+
+#Two Sampled T-Test for GPA of Admitted and Rejected
+ttest2sample_gpa = t.test(admit_student$gpa,reject_student$gpa)
+ttest2sample_gpa
+
+```
 
 
 
-### Question 6
+### Question 6: Contingency Table
 
 **With the dataset Adata2, construct a contingency table between rank and admit. Are these two variables qualitative or quantitative? **
 
-Answer answer answer. Lorem ipsum dolor sit amet...
+Both the rank and admit variable are qualitative variables. The admit variable describes the admissions status of the applicant. The rank variable describes the academic prestige of an applicant. Therefore, both of these variables are qualitative rather than quantitative.
 
+```{r, results = "asis"}
+cont_table1 <- table(Adata2$admit, Adata2$rank)
+rownames(cont_table1) <- c("Rejected", "Admitted")
+colnames(cont_table1) <- c("Rank 1", "Rank 2", "Rank 3", "Rank 4")
+xkabledply(as.table(cont_table1), title = 'Contingency Table Between Rank and Admission')
 
+```
 
-### Question 7
+### Question 7: Chi-Squared Test
 
 **Find out whether rank is independent of admission, according to the contingency table above. **
 
-Answer answer answer. Lorem ipsum dolor sit amet...
+The Chi-squared Test of Independence indicates that the rank and admission variables are related. The null hypothesis can be rejected in favor of the alternative hypothesis, indicating that a relationship does exist between the rank and admissions categorical variables. This is because the p-value for the Chi-squared Test is 1e-05, which is smaller than the critical value of 0.05. Therefore, the rank and admission are independent.
+
+
+```{r,}
+
+chitest1 <- chisq.test(table(Adata2$admit, Adata2$rank))
+chitest1
+
+```
 
 
 
-### Question 8
+
+### Question 8: ANOVA Test
 
 **From *Adata2*, test whether students from the four ranks have the same average gre or not. And also test if they have the same average gpa or not. Remember that if they are not all the same, you will need to follow up with a post hoc test. Make brief comments on your results.**
 
-Answer answer answer. Lorem ipsum dolor sit amet...
+The ANOVA test for gre and rank indicates is statistically insignificant as indicated by the p-value of 0.15 which is larger than the 0.05 critical value. This means that the null hypotheses cannot be rejected and that there is no difference in the means between gre and rank. Since the ANOVA test is not statistically significant, a follow-up Tukey post hoc test is not necessary.
+
+The ANOVA test for gpa and rank indicates is statistically insignificant as indicated by the p-value of 0.14 which is larger than the 0.05 critical value. This means that the null hypotheses cannot be rejected and that there is no difference in the means between gpa and rank. Since the ANOVA test is not statistically significant, a follow-up Tukey post hoc test is not necessary.
+
+```{r, results = "asis"}
+
+anova_gre<-aov(gre~as.factor(rank), data=Adata2)
+sum_anova_gre<-summary(anova_gre)
+xkabledply(sum_anova_gre, title = "ANOVA Test for Rank and GRE")
+
+
+anova_gpa<-aov(gpa~as.factor(rank), data=Adata2)
+sum_anova_gpa<-summary(anova_gpa)
+xkabledply(sum_anova_gpa, title = "ANOVA Test for Rank and GPA")
+
+```
 
 
 
