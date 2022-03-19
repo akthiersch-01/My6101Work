@@ -1,24 +1,30 @@
 ---
 title: "Intro to DS - Linear Model part I"
-author: "Edwin Lo, GWU Intro to Data Science DATS 6101"
+author: "Alexander Thiersch, GWU Intro to Data Science DATS 6101"
 # date: "today"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+  rmdformats::readthedown:
+    toc_depth: 3
+    toc_float: yes
     code_folding: hide
-    number_sections: false
+  html_document:
+    theme: bootstrap
+    code_folding: hide
+    number_sections: no
     toc: yes
     toc_depth: 3
     toc_float: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
 ---
 
 ```{r init, include=FALSE}
 # some of common options (and the defaults) are: 
 # include=T, eval=T, echo=T, results='hide'/'asis'/'markup',..., collapse=F, warning=T, message=T, error=T, cache=T, fig.width=6, fig.height=4, fig.dim=c(6,4) #inches, fig.align='left'/'center','right', 
 library(ezids)
+library(readr)
+library(dplyr)   
+library(corrplot)
+library(car)
 # knitr::opts_chunk$set(warning = F, results = "markup", message = F)
 knitr::opts_chunk$set(warning = F, results = "hide", message = F)
 options(scientific=T, digits = 3) 
@@ -29,22 +35,45 @@ options(scientific=T, digits = 3)
 
 # HW assignment
 
-## Linear model - quantitative regressors 
+## Linear model - Quantitative Regressors 
 
-### Question 1  
+### Question 1: Import & Subset Data   
 **Import the data, call it `bikeorig.`**  
 The `Date` variable is probably imported as factor level variable. In any case, let us remove `Date`, `Casual.Users`, 
 and `Registered.Users` in the dataset and save it as a new datafame, call it `bike`. How many variables are in `bike`? 
 How many of them are imported as `int`? Feel free to rename longer variable names into shorter ones for convenience.  
 
 
+After removing the variables Date, Casual Users and Registered Users, there are a total of 11 variables. None of the variables are reported as integers. All of the variables are numeric.
 
-### Question 2    
+```{r}
+bikeorig<-read_csv("~/Documents/My6101Work/bikedata.csv")
+#View(bikeorig)
+
+bike<-subset(bikeorig, select= -c(1,12,13))
+#View(bike)
+
+sapply(bike, class)
+
+```
+
+
+### Question 2: Subset by Hour    
 **Select only the subset with `Hour` equal 16 only. Call it `bike16`**  
-These are the afternoon rush hour data. How many observations are there?   
+These are the afternoon rush hour data. How many observations are there? 
+
+After filtering the data to only contain data associated when Hour equals 16, there is a total of 730 observations.
+
+```{r}
+
+bike16<-filter(bike, Hour == 16)
+
+count(bike16)
+
+```
 
 
-### Question 3  
+### Question 3: Factor Variables  
 **Before building any models, we should make sure the variables are set up properly.**  
 (This problem is solved for you. Codes are given below.)  
 Which ones should be recorded as categorical? Convert them now before we proceed to the model building.  
@@ -67,9 +96,9 @@ data values from it.
 bike_final = bike16
 bike_final$Season = factor(bike16$Season)
 bike_final$Holiday = factor(bike16$Holiday)
-bike_final$Day = factor(bike16$Day)
-bike_final$Workday = factor(bike16$Workday)
-bike_final$Weather = factor(bike16$Weather)
+bike_final$`Day of the Week` = factor(bike16$`Day of the Week`)
+bike_final$`Working Day` = factor(bike16$`Working Day`)
+bike_final$`Weather Type` = factor(bike16$`Weather Type`)
 str(bike_final)
 ```
 
@@ -78,26 +107,56 @@ We decided to convert these variables into categorical (factor):
 the dataframe `bike16` still has all variables numerical, while the df `bike_final` 
 include categorical columns that we just converted. 
 
-### Question 4  
+### Question 4: Pairs Plot  
 **Make a `pairs()` plot with all the variables (quantitative and qualitative).**  
 
+```{r, results='markup'}
+pairs(bike_final)
 
-### Question 5  
+```
+
+
+### Question 5: Corrploty/Cor-matrix  
 **Make a `corrplot()` with only the numerical variables.**  
 You can either subset the df with only numerical variables first, then create 
 the create the cor-matrix to plot. Or you can create the cor-matrix from 
 `bike16`, then select select out the portion of the matrix that you want. 
 Use options that shows well the relationships between different variables. 
  
+```{r}
+sapply(bike_final, class)
 
+#View(bike_final)
 
-### Question 6   
+bike_final_numvar<-subset(bike_final, select = -c(1,3,4,5,6))
+#View(bike_final_numvar)
+
+M<-cor(bike_final_numvar)
+
+corrplot(M, is.corr = TRUE, method = 'number', na.label='NA')
+
+```
+
+### Question 6: Linear Model 1   
 **By using numerical variables only, build a linear model with 1 independent variable to predict the `Total Users`.**  
 Choose the variable with the strongest correlation coefficient. Make some short 
 comments on the coefficient values, their p-values, and the multiple R-squared value.  
 
 
-### Question 7   
+The results of the linear model indicate that there is a positive association between Total Users and Temperature Feels F. This indicates that as Temperature Feels F increases, Total Users also increases. For every one unit increase in Temperature Feels F corresponds with a 4.024 increase in Total Users. Additionally the coefficient is statistically significant at the 5% significance level. 
+
+
+The intercept coefficient indicates that when Temperature Feels F equals 0, there is 44.530 Total Users. The intercept coefficient is statistically significant at the 5% significance level.  
+
+The multiple R-squared is 0.309. This indicates that the model does not fit the data very well. In other words, only 30.9% of the variation in Total Users variable can be explained by the Temperature Feels F variable.
+
+```{r, results='markup'}
+model1 <- lm(`Total Users`~`Temperature Feels F`, data=bike_final_numvar)
+summary(model1)
+```
+
+
+### Question 7: Linear Model 2   
 **Next, add a second variable to the model.**  
 Choose the variable with the next strongest correlation, but avoid using 
 obviously collinear variables. When you have the model, check 
@@ -108,17 +167,66 @@ comment on the coefficient values, their p-values,
 and the multiple R-squared value.  
 
 
-### Question 8  
+The results of the linear model indicate that there is a positive association between Total Users and Temperature Feels F. This indicates that as Temperature Feels F increases, Total Users also increases. For every one unit increase in Temperature Feels F corresponds with a 3.859 increase in Total Users. Additionally the coefficient is statistically significant at the 5% significance level. The results of the linear model also indicate that there is a negative association between Total Users and Humidity. This indicates that as Humidity increases, Total Users decreases For every one unit increase in Humidity corresponds with a -1.678 decrease in Total Users. Additionally the coefficient is statistically significant at the 5% significance level
+
+The intercept coefficient indicates that when Temperature Feels F and Humidity equal 0, there is 138.712 Total Users. The intercept coefficient is statistically significant at the 5% significance level.  
+
+The multiple R-squared is 0.354. This indicates that the model does not fit the data very well. In other words, only 35.4% of the variation in Total Users variable can be explained by the Temperature Feels F and Humidity variables.
+
+The VIF value for Temperature Feel F is 1.01. The VIF value for Humidity is 1.01. This indicates that there is low correlation among the independent variables.
+
+```{r, results='markup'}
+model2 <- lm(`Total Users`~`Temperature Feels F`+ Humidity, data=bike_final_numvar)
+summary(model2)
+
+vif(model2)
+
+```
+
+
+### Question 8: Linear Model 3  
 **We will try one more time as in the previous question, to add a third variable in our model.**  
 
 
-### Question 9  
+The results of the linear model indicate that there is a positive association between Total Users and Temperature Feels F. This indicates that as Temperature Feels F increases, Total Users also increases. For every one unit increase in Temperature Feels F corresponds with a 3.823 increase in Total Users. Additionally the coefficient is statistically significant at the 5% significance level. The results of the linear model also indicate that there is a negative association between Total Users and Humidity. This indicates that as Humidity increases, Total Users decreases For every one unit increase in Humidity corresponds with a -1.750 decrease in Total Users. Additionally the coefficient is statistically significant at the 5% significance level. Finally, the results of the linear model also indicate that there is a negative association between Total Users and Wind Speed. This indicates that as Wind Speed increases, Total Users decreases. For every one unit increase in Wind Speed corresponds with a -1.137 decrease in Total Users. Additionally the coefficient is statistically significant at the 5% significance level.
+
+The intercept coefficient indicates that when Temperature Feels F, Humidity, and Wind Speed equal 0, there is 162.710 Total Users. The intercept coefficient is statistically significant at the 5% significance level.  
+
+The multiple R-squared is 0.358. This indicates that the model does not fit the data very well. In other words, only 35.8% of the variation in Total Users variable can be explained by the Temperature Feels F and Humidity variables.
+
+The VIF value for Temperature Feel F is 1.02. The VIF value for Humidity is 1.03. The VIF value for Wind Spee is 1.03. This indicates that there is low correlation among the independent variables.
+
+```{r, results='markup'}
+model3 <- lm(`Total Users`~`Temperature Feels F`+Humidity+`Wind Speed`, data=bike_final_numvar)
+summary(model3)
+
+vif(model3)
+
+```
+
+### Question 9: CI for Coefficients  
 **For the 3-variable model you found, find the confidence intervals of the coefficients.**  
 
+```{r, results='markup'}
+xkabledply(confint(model3, level = 0.95), title = "Confidence Intervals for the Coefficents of Model 3")
+```
 
-### Question 10    
+
+### Question 10: ANOVA Tests for Models    
 **Use ANOVA to compare the three different models you found.**  
 You have found three different models. Use ANOVA test to compare their residuals. What conclusion can you draw?
 
+All of the models tested have large positive residuals. A positive residual indicates that the corresponding values are greater than the sample mean. Additionally, all ANOVA tests display statistical significance at the 5% level. This means that the null hypothesis can be rejected in favor of the alternative hypothesis suggesting that there is a difference among group means.
 
 
+```{r, results='markup'}
+aov1<-aov(lm(`Total Users`~`Temperature Feels F`, data=bike_final_numvar))
+xkabledply(summary(aov1), title = "ANOVA Test for Model 1")
+
+aov2<-aov(lm(`Total Users`~`Temperature Feels F`+ Humidity, data=bike_final_numvar))
+xkabledply(summary(aov2), title ="ANOVA Test for Model 2")
+
+aov3<-aov(lm(`Total Users`~`Temperature Feels F`+ Humidity + `Wind Speed`, data=bike_final_numvar))
+xkabledply(summary(aov3), title = "ANOVA Test for Model 3")
+
+```
