@@ -101,7 +101,7 @@ xkabledply(head(reject_student), title = "Rejected Applicants Dataset")
 ```
 
 
-### Question 4: Histograms and QQ-Plots
+### Question 4: Histogram & QQ Plots
 
 **We were a little careless last time. Let us check for normality on the numerical variables. Let us use histogram (use `ggplot()`) and QQ-plot (use `qqnorm()`) to check the quantitative variables for the admitted and rejected subsets. Make a brief comment on the results. **
 
