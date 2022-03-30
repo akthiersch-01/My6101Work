@@ -19,6 +19,10 @@ output:
 # some of common options (and the defaults) are: 
 # include=T, eval=T, echo=T, results='hide'/'asis'/'markup',..., collapse=F, warning=T, message=T, error=T, cache=T, fig.width=6, fig.height=4, fig.dim=c(6,4) #inches, fig.align='left'/'center','right', 
 library(ezids)
+library(readr)
+library(corrplot)
+library(Hmisc)
+library(kableExtra)
 # knitr::opts_chunk$set(warning = F, results = "markup", message = F)
 knitr::opts_chunk$set(warning = F, results = "hide", message = F)
 options(scientific=T, digits = 3) 
@@ -35,8 +39,9 @@ Let us re-analyze the problem we had from last time, but include categorical reg
 import the data, and change those appropriate ones to factors.
 
 ```{r}
-bikeorig = data.frame(read.csv("bikedata.csv"))
-bike = subset(bikeorig, select = -c(Date, Casual.Users, Registered.Users)) # remove irrelevant columns
+#bikeorig = data.frame(read.csv("bikedata.csv"))
+bikeorig <- read_csv("~/Documents/My6101Work/bikedata.csv")
+bike = subset(bikeorig, select = -c(Date, `Casual Users`,`Registered Users`)) # remove irrelevant columns
 colnames(bike)[4:11] = c("Day","Workday","Weather","TempF","TempxFF","Humidity","Wind","Tusers") # rename some columns
 bike16 = subset(bike, bike$Hour == 16) # with only Hour-16 data. All columns are numerical
 nrow(bike16)
@@ -59,10 +64,24 @@ Correlation Coefficients on the Same Sets of Data.
 Quaestiones Geographicae, 30(2) 87-93](https://doi.org/10.2478/v10117-011-0021-1).  
 Simply indicate you have read it.
 
+I have read the paper.
+
 ### Question 1  
 **Compare the difference of the correlation matrix between the Pearson and Spearman methods**  
 Look at the correlation matrices using the two methods. Compare and comment on their differences.
 
+The correlation matrices between Pearson and Spearmon are relatively similar. However, The Spearman's correlation matrix does display correlation coefficients that are large that the Pearson'correlation matrix.
+
+```{r}
+
+corr_bike1<-rcorr(as.matrix(bike_final), type = "pearson")
+corr_bike1
+
+corr_bike2<-rcorr(as.matrix(bike_final), type = "spearman")
+corr_bike2
+
+
+```
 
 
 
@@ -71,6 +90,23 @@ Look at the correlation matrices using the two methods. Compare and comment on t
 Write down the model equation as we did in class, like  
 `Tusers` = 0.28 + 5.29 `TempF`, just as an example.
 
+Baseline linear model equation for Tusers.
+
+Tusers = 417.42 + (-2.13)Humidity
+
+```{r}
+
+fit1 <- lm(Tusers~Humidity, data = bike_final)
+table1<-summary(fit1)
+
+table1$coefficients %>%
+  kbl(caption="Baseline Linear Model: lm(Tuser~Humidity)",
+       format= "html", col.names = c("Estimate", "Std. Error", "t-value", "Pr(>|T|)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+
+```
 
 
 ### Question 3    
@@ -79,11 +115,46 @@ Use the correlation matrix as a guide to decide on which variables to use.
 Find and interpret the results. Also write down the model equation for the different 
 categorical factor levels on separate lines.
 
+Linear models for Tusers using Humidity and Weather. Weather was chosen as the categorical variable because it had the strongest negative coefficient among the categorical variables. Written below are the following linear models:
+
+Tuser = 373.384 + (-0.880)Humidity + (0)Weather1
+
+Tuser = 373.384 + (-0.880)Humidity + (-21.825)Weather2
+
+Tuser = 373.384 + (-0.880)Humidity + (-21.825)Weather2
+
+Tuser = 373.384 + (-0.880)Humidity + (-135.812)Weather3
+
+Tuser = 373.384 + (-0.880)Humidity + (-255.446)Weather4
+
+
+```{r}
+
+fit2 <- lm(Tusers~Humidity+Weather, data = bike_final)
+table2<-summary(fit2)
+
+table2$coefficients %>%
+  kbl(caption="Linear Models for Num & Cat predictors: lm(Tuser~Humidity+Weather)",
+       format= "html", col.names = c("Estimate", "Std. Error", "t-value", "Pr(>|T|)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+
+```
+
 
 
 ### Question 4  
 **Next extend the previous model for `Tusers`, but include the interaction term between the numerical and categorical variable.**  
 Again, write down the model equation for different categorical factor levels on separate lines. Comment of the slope and coefficients. 
+```{r}
+
+
+
+
+```
+
+
 
 
 ### Question 5  
