@@ -147,15 +147,32 @@ table2$coefficients %>%
 ### Question 4  
 **Next extend the previous model for `Tusers`, but include the interaction term between the numerical and categorical variable.**  
 Again, write down the model equation for different categorical factor levels on separate lines. Comment of the slope and coefficients. 
+
+The following are the linear models that have a interaction term between Humidity and Weather:
+
+Tuser = 352.701 + (-0.351)(Humidity:Weather1)
+
+Tuser = 352.701 + (-1.021)(Humidity:Weather2)
+
+Tuser = 352.701 + (-2.317)(Humidity:Weather3)
+
+Tuser = 352.701 + (-3.405)(Humidity:Weather4)
+
+
+All of the following slope coefficients are statistically significant with the exception of the final interaction term Humidity:Weather1. Additionally, as the rank of the categorical variables increases the coefficients became more negative. This indicates as the rank of weather increases there is a stronger negative relationship with Tuser when Humidity and Weather interact.
+
 ```{r}
 
+fit3 <- lm(Tusers~Humidity:Weather, data = bike_final)
+table3<-summary(fit3)
 
-
+table3$coefficients %>%
+  kbl(caption="Linear Model w/ Interaction Term: lm(Tuser~Humidity:Weather)",
+       format= "html", col.names = c("Estimate", "Std. Error", "t-value", "Pr(>|T|)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
 
 ```
-
-
-
 
 ### Question 5  
 **Let us use this model equation `Tusers ~ TempF + Season + Wind:Weather + Season:Weather`.**  
@@ -165,11 +182,26 @@ between how the base-level is handled here and the previous models.
 
 
 
+
+```{r}
+
+fit4 <- lm(Tusers ~ TempF + Season + Wind:Weather + Season:Weather, data = bike_final)
+table4<-summary(fit4)
+
+table4$coefficients %>%
+  kbl(caption="Linear Model w/ Interaction Term: lm(Tusers~TempF+Season+Wind:Weather+Season:Weather)",
+       format= "html", col.names = c("Estimate", "Std. Error", "t-value", "Pr(>|T|)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+```
+
+
 ### Question 6  
 **Compare the above models using ANOVA**  
 Interpret and comment on your results. 
 
- 
+
 
 
 ### Question 7   
