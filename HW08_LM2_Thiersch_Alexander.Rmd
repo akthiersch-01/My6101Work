@@ -23,6 +23,10 @@ library(readr)
 library(corrplot)
 library(Hmisc)
 library(kableExtra)
+library(car)
+library(broom)
+library(dplyr)
+library(stats)
 # knitr::opts_chunk$set(warning = F, results = "markup", message = F)
 knitr::opts_chunk$set(warning = F, results = "hide", message = F)
 options(scientific=T, digits = 3) 
@@ -56,7 +60,7 @@ bike_final$Weather = factor(bike16$Weather)
 str(bike_final) # Same as bike16 except some columns are now factor level.
 ```
 
-### Question 0  
+### Question 0: Hauke & Kossowski (2011) 
 **Pearson vs Spearman**  
 Read the article here:  
 Hauke,J. & Kossowski,T.(2011). [Comparison of Values of Pearson's and Spearman's 
@@ -66,26 +70,50 @@ Simply indicate you have read it.
 
 I have read the paper.
 
-### Question 1  
+### Question 1: Corr Matrices  
 **Compare the difference of the correlation matrix between the Pearson and Spearman methods**  
 Look at the correlation matrices using the two methods. Compare and comment on their differences.
 
-The correlation matrices between Pearson and Spearmon are relatively similar. However, The Spearman's correlation matrix does display correlation coefficients that are large that the Pearson'correlation matrix.
+The correlation matrices between Pearson and Spearman are relatively similar. However, The Spearman's correlation matrix does display correlation coefficients that are overall larger that the Pearson'correlation matrix.
 
-```{r}
+```{r,results='asis'}
 
 corr_bike1<-rcorr(as.matrix(bike_final), type = "pearson")
 corr_bike1
 
+corr_bike1$r %>%
+  kbl(caption="Pearson's Correlation Matrix for bike_final Dataset",
+       format= "html", col.names = c("Season", "Holiday", "Day", "Workday", "Weather", "TempF", "Humidity", "Wind", "Tusers"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+corr_bike1$P %>%
+  kbl(caption="Pearson's Correlation Matrix p-values for bike_final Dataset",
+       format= "html", col.names = c("Season", "Holiday", "Day", "Workday", "Weather", "TempF", "Humidity", "Wind", "Tusers"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+
 corr_bike2<-rcorr(as.matrix(bike_final), type = "spearman")
 corr_bike2
 
+corr_bike2$r %>%
+  kbl(caption="Spearman's Correlation Matrix for bike_final Dataset",
+       format= "html", col.names = c("Season", "Holiday", "Day", "Workday", "Weather", "TempF", "Humidity", "Wind", "Tusers"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
 
+
+corr_bike2$P %>%
+  kbl(caption="Spearman's Correlation Matrix p-values for bike_final Dataset",
+       format= "html", col.names = c("Season", "Holiday", "Day", "Workday", "Weather", "TempF", "Humidity", "Wind", "Tusers"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
 ```
 
 
 
-### Question 2    
+### Question 2: Basline LM Model    
 **Build a baseline linear model for `Tusers`, with one numerical predictor.**  
 Write down the model equation as we did in class, like  
 `Tusers` = 0.28 + 5.29 `TempF`, just as an example.
@@ -94,7 +122,7 @@ Baseline linear model equation for Tusers.
 
 Tusers = 417.42 + (-2.13)Humidity
 
-```{r}
+```{r,results='asis'}
 
 fit1 <- lm(Tusers~Humidity, data = bike_final)
 table1<-summary(fit1)
@@ -109,7 +137,7 @@ table1$coefficients %>%
 ```
 
 
-### Question 3    
+### Question 3: LM Model for Tusers 
 **Build a linear model for `Tusers`, with one numerical and one categorical predictor with at least 3 levels.**  
 Use the correlation matrix as a guide to decide on which variables to use. 
 Find and interpret the results. Also write down the model equation for the different 
@@ -121,14 +149,12 @@ Tuser = 373.384 + (-0.880)Humidity + (0)Weather1
 
 Tuser = 373.384 + (-0.880)Humidity + (-21.825)Weather2
 
-Tuser = 373.384 + (-0.880)Humidity + (-21.825)Weather2
-
 Tuser = 373.384 + (-0.880)Humidity + (-135.812)Weather3
 
 Tuser = 373.384 + (-0.880)Humidity + (-255.446)Weather4
 
 
-```{r}
+```{r,results='asis'}
 
 fit2 <- lm(Tusers~Humidity+Weather, data = bike_final)
 table2<-summary(fit2)
@@ -141,10 +167,7 @@ table2$coefficients %>%
 
 
 ```
-
-
-
-### Question 4  
+### Question 4: LM Model for Interact Tusers  
 **Next extend the previous model for `Tusers`, but include the interaction term between the numerical and categorical variable.**  
 Again, write down the model equation for different categorical factor levels on separate lines. Comment of the slope and coefficients. 
 
@@ -159,9 +182,9 @@ Tuser = 352.701 + (-2.317)(Humidity:Weather3)
 Tuser = 352.701 + (-3.405)(Humidity:Weather4)
 
 
-All of the following slope coefficients are statistically significant with the exception of the final interaction term Humidity:Weather1. Additionally, as the rank of the categorical variables increases the coefficients became more negative. This indicates as the rank of weather increases there is a stronger negative relationship with Tuser when Humidity and Weather interact.
+All of the following slope coefficients are statistically significant with the exception of the final interaction term Humidity:Weather1. Additionally, as the rank of the categorical variables increases the coefficients became more negative. This indicates as the rank of weather increases there is a stronger negative relationship with Tuser when Humidity and Weather interact. However, the adjusted R-squared value is relatively low, 0.124. This indicates that the independent variables of the model can only explain approximately 12.4% of the variation in Tusers.
 
-```{r}
+```{r,results='asis'}
 
 fit3 <- lm(Tusers~Humidity:Weather, data = bike_final)
 table3<-summary(fit3)
@@ -174,16 +197,15 @@ table3$coefficients %>%
 
 ```
 
-### Question 5  
+### Question 5: More LM Model Interacts  
 **Let us use this model equation `Tusers ~ TempF + Season + Wind:Weather + Season:Weather`.**  
 Notice the presence/absence of coefficients for the base-level categories. 
-No need to write down the model equations this time. But comment on what is the difference 
-between how the base-level is handled here and the previous models. 
+No need to write down the model equations this time. But comment on what is the difference between how the base-level is handled here and the previous models. 
+
+The base-level model for the Season variable and the Season:Weather interaction variables are dropped from the linear model table. However, the base-line model of the Wind:Weather interaction variable is not dropped. 
 
 
-
-
-```{r}
+```{r,results='asis'}
 
 fit4 <- lm(Tusers ~ TempF + Season + Wind:Weather + Season:Weather, data = bike_final)
 table4<-summary(fit4)
@@ -197,18 +219,75 @@ table4$coefficients %>%
 ```
 
 
-### Question 6  
+### Question 6: ANOVA Model Comparisons  
 **Compare the above models using ANOVA**  
 Interpret and comment on your results. 
 
+All models run through the ANOVA test display low p-values indicating that the group means within each model are different from one another. Therefore, the null hypothesis is rejected, and the groups of the categorical variables are different from one another.
+
+```{r,results='asis'}
+
+aov1<-tidy(aov(fit1))
+aov1 %>%
+  kbl(caption="ANOVA Test for Model 1: lm(Tuser~Humidity)",
+       format= "html", col.names = c("Res.Df", "RSS", "DF", "Sum of Sq","F","Pr(>F)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+a<-aov(Tusers~Humidity, data = bike_final)
+
+TukeyHSD(a, ordered = FALSE, conf.level=0.95)
+
+
+aov2<-tidy(aov(fit2))
+aov2 %>%
+  kbl(caption="ANOVA Test for Model 2: lm(Tusers~Humidity+Weather)",
+       format= "html", col.names = c("Res.Df", "RSS", "DF", "Sum of Sq","F","Pr(>F)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+b<-aov(Tusers~Weather, data = bike_final)
+TukeyHSD(b)
+
+
+aov3<-tidy(aov(fit3))
+aov3 %>%
+  kbl(caption="ANOVA Test for Model 3: lm(Tuser~Humidity:Weather)",
+       format= "html", col.names = c("Res.Df", "RSS", "DF", "Sum of Sq","F","Pr(>F)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+
+aov4<-tidy(aov(fit4))
+aov4 %>%
+  kbl(caption="ANOVA Test for Model 4: lm(Tusers~TempF+Season+Wind:Weather+Season:Weather)",
+       format= "html", col.names = c("Res.Df", "RSS", "DF", "Sum of Sq","F","Pr(>F)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+```
 
 
 
-### Question 7   
+
+### Question 7: More LM Models w/Cat. Vars.
 **Try build a model with three categorical variables only, and their interaction terms.**  
 What are we really getting?  Describe and explain. 
+
+The following linear model are displaying coefficients for each interaction variable and for each rank for each categorical variable. The different signs of each coefficient indicate that different interaction variables have either positive or negative association with Tusers.
   
+```{r, results='asis'}
+
+fit5 <- lm(Tusers ~ Weather:Humidity+ Day:Humidity + Season:Humidity, data = bike_final)
+table5<-summary(fit5)
+
+table5$coefficients %>%
+  kbl(caption="Linear Model w/ Interaction Term: lm(Tusers~Weather:Humidity+Day:Humidity+Season:Humidity)",
+       format= "html", col.names = c("Estimate", "Std. Error", "t-value", "Pr(>|T|)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
 
 
+```
 
 
