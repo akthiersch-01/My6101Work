@@ -4,15 +4,13 @@ author: "Alexander Thiersch, GWU Intro to Data Science DATS 6101"
 # date: "today"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    code_folding: hide
-    number_sections: false
-    toc: yes
-    toc_depth: 3
-    toc_float: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
+    html_document:
+      theme: cerulean
+      code_folding: hide
+      number_sections: false
+      toc: yes
+      toc_depth: 3
+      toc_float: yes
 ---
 
 ```{r init, include=FALSE}
