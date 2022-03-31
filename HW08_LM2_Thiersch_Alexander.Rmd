@@ -35,9 +35,9 @@ options(scientific=T, digits = 3)
 # use scipen=999 to prevent scientific notation at all times
 ```
 
-# HW assignment
+# HW Assignment
 
-## Linear model - categorical regressors 
+## Linear Model - Categorical Regressors 
 
 Let us re-analyze the problem we had from last time, but include categorical regressors. First, 
 import the data, and change those appropriate ones to factors.
