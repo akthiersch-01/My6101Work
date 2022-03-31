@@ -41,8 +41,8 @@ Let us re-analyze the problem we had from last time, but include categorical reg
 import the data, and change those appropriate ones to factors.
 
 ```{r}
-#bikeorig = data.frame(read.csv("bikedata.csv"))
-bikeorig <- read_csv("~/Documents/My6101Work/bikedata.csv")
+bikeorig = data.frame(read.csv("bikedata.csv"))
+#bikeorig <- read_csv("~/Documents/My6101Work/bikedata.csv")
 bike = subset(bikeorig, select = -c(Date, `Casual Users`,`Registered Users`)) # remove irrelevant columns
 colnames(bike)[4:11] = c("Day","Workday","Weather","TempF","TempxFF","Humidity","Wind","Tusers") # rename some columns
 bike16 = subset(bike, bike$Hour == 16) # with only Hour-16 data. All columns are numerical
