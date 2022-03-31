@@ -1,6 +1,6 @@
 ---
 title: "Intro to DS - LM part II factor regressors"
-author: "Edwin Lo, GWU Intro to Data Science DATS 6101"
+author: "Alexander Thiersch, GWU Intro to Data Science DATS 6101"
 # date: "today"
 date: "`r Sys.Date()`"
 output:
@@ -74,12 +74,11 @@ I have read the paper.
 **Compare the difference of the correlation matrix between the Pearson and Spearman methods**  
 Look at the correlation matrices using the two methods. Compare and comment on their differences.
 
-The correlation matrices between Pearson and Spearman are relatively similar. However, The Spearman's correlation matrix does display correlation coefficients that are overall larger that the Pearson'correlation matrix.
+The correlation matrices between Pearson and Spearman are relatively similar. However, The Spearman's correlation matrix does display correlation coefficients that are overall larger that the Pearson's correlation matrix.
 
 ```{r,results='asis'}
 
 corr_bike1<-rcorr(as.matrix(bike_final), type = "pearson")
-corr_bike1
 
 corr_bike1$r %>%
   kbl(caption="Pearson's Correlation Matrix for bike_final Dataset",
@@ -95,7 +94,6 @@ corr_bike1$P %>%
 
 
 corr_bike2<-rcorr(as.matrix(bike_final), type = "spearman")
-corr_bike2
 
 corr_bike2$r %>%
   kbl(caption="Spearman's Correlation Matrix for bike_final Dataset",
@@ -128,7 +126,7 @@ fit1 <- lm(Tusers~Humidity, data = bike_final)
 table1<-summary(fit1)
 
 table1$coefficients %>%
-  kbl(caption="Baseline Linear Model: lm(Tuser~Humidity)",
+  kbl(caption="Baseline Linear Model: lm(Tusers~Humidity)",
        format= "html", col.names = c("Estimate", "Std. Error", "t-value", "Pr(>|T|)"),
       align="r") %>%
    kable_classic_2(full_width = F, html_font = "helvetica")
@@ -160,7 +158,7 @@ fit2 <- lm(Tusers~Humidity+Weather, data = bike_final)
 table2<-summary(fit2)
 
 table2$coefficients %>%
-  kbl(caption="Linear Models for Num & Cat predictors: lm(Tuser~Humidity+Weather)",
+  kbl(caption="Linear Models for Num & Cat predictors: lm(Tusers~Humidity+Weather)",
        format= "html", col.names = c("Estimate", "Std. Error", "t-value", "Pr(>|T|)"),
       align="r") %>%
    kable_classic_2(full_width = F, html_font = "helvetica")
@@ -190,7 +188,7 @@ fit3 <- lm(Tusers~Humidity:Weather, data = bike_final)
 table3<-summary(fit3)
 
 table3$coefficients %>%
-  kbl(caption="Linear Model w/ Interaction Term: lm(Tuser~Humidity:Weather)",
+  kbl(caption="Linear Model w/ Interaction Term: lm(Tusers~Humidity:Weather)",
        format= "html", col.names = c("Estimate", "Std. Error", "t-value", "Pr(>|T|)"),
       align="r") %>%
    kable_classic_2(full_width = F, html_font = "helvetica")
@@ -234,9 +232,6 @@ aov1 %>%
       align="r") %>%
    kable_classic_2(full_width = F, html_font = "helvetica")
 
-a<-aov(Tusers~Humidity, data = bike_final)
-
-TukeyHSD(a, ordered = FALSE, conf.level=0.95)
 
 
 aov2<-tidy(aov(fit2))
@@ -245,9 +240,6 @@ aov2 %>%
        format= "html", col.names = c("Res.Df", "RSS", "DF", "Sum of Sq","F","Pr(>F)"),
       align="r") %>%
    kable_classic_2(full_width = F, html_font = "helvetica")
-
-b<-aov(Tusers~Weather, data = bike_final)
-TukeyHSD(b)
 
 
 aov3<-tidy(aov(fit3))

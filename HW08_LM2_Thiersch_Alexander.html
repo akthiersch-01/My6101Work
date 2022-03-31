@@ -282,34 +282,1358 @@ bike_final$Day = factor(bike16$Day)
 bike_final$Workday = factor(bike16$Workday)
 bike_final$Weather = factor(bike16$Weather)
 str(bike_final) # Same as bike16 except some columns are now factor level.</code></pre>
-<div id="question-0" class="section level3">
-<h3>Question 0</h3>
+<div id="question-0-hauke-kossowski-2011" class="section level3">
+<h3>Question 0: Hauke &amp; Kossowski (2011)</h3>
 <p><strong>Pearson vs Spearman</strong><br />
 Read the article here:<br />
 Hauke,J. &amp; Kossowski,T.(2011). <a href="https://doi.org/10.2478/v10117-011-0021-1">Comparison of Values of Pearson’s and Spearman’s Correlation Coefficients on the Same Sets of Data. Quaestiones Geographicae, 30(2) 87-93</a>.<br />
 Simply indicate you have read it.</p>
 <p>I have read the paper.</p>
 </div>
-<div id="question-1" class="section level3">
-<h3>Question 1</h3>
+<div id="question-1-corr-matrices" class="section level3">
+<h3>Question 1: Corr Matrices</h3>
 <p><strong>Compare the difference of the correlation matrix between the Pearson and Spearman methods</strong><br />
 Look at the correlation matrices using the two methods. Compare and comment on their differences.</p>
-<p>The correlation matrices between Pearson and Spearmon are relatively similar. However, The Spearman’s correlation matrix does display correlation coefficients that are large that the Pearson’correlation matrix.</p>
+<p>The correlation matrices between Pearson and Spearman are relatively similar. However, The Spearman’s correlation matrix does display correlation coefficients that are overall larger that the Pearson’correlation matrix.</p>
 <pre class="r"><code>corr_bike1&lt;-rcorr(as.matrix(bike_final), type = &quot;pearson&quot;)
-corr_bike1</code></pre>
-<pre><code>     Season Holiday   Day Workday Weather TempF Humidity  Wind Tusers</code></pre>
-<p>Season 1.00 0.06 0.00 -0.03 0.07 -0.52 0.09 -0.07 -0.28 Holiday 0.06 1.00 -0.10 -0.25 0.00 -0.03 -0.02 0.03 -0.05 Day 0.00 -0.10 1.00 0.04 0.04 0.00 -0.06 0.01 0.06 Workday -0.03 -0.25 0.04 1.00 0.00 0.05 0.01 -0.03 -0.19 Weather 0.07 0.00 0.04 0.00 1.00 -0.21 0.63 -0.02 -0.32 TempF -0.52 -0.03 0.00 0.05 -0.21 1.00 -0.14 -0.03 0.55 Humidity 0.09 -0.02 -0.06 0.01 0.63 -0.14 1.00 -0.14 -0.27 Wind -0.07 0.03 0.01 -0.03 -0.02 -0.03 -0.14 1.00 -0.07 Tusers -0.28 -0.05 0.06 -0.19 -0.32 0.55 -0.27 -0.07 1.00</p>
-<p>n= 730</p>
-<p>P Season Holiday Day Workday Weather TempF Humidity Wind Tusers Season 0.1290 0.9212 0.3782 0.0579 0.0000 0.0145 0.0515 0.0000 Holiday 0.1290 0.0057 0.0000 0.9012 0.4979 0.6056 0.4674 0.2146 Day 0.9212 0.0057 0.3214 0.3018 0.9913 0.1125 0.8335 0.1057 Workday 0.3782 0.0000 0.3214 0.9920 0.1820 0.8902 0.4752 0.0000 Weather 0.0579 0.9012 0.3018 0.9920 0.0000 0.0000 0.5422 0.0000 TempF 0.0000 0.4979 0.9913 0.1820 0.0000 0.0002 0.3782 0.0000 Humidity 0.0145 0.6056 0.1125 0.8902 0.0000 0.0002 0.0002 0.0000 Wind 0.0515 0.4674 0.8335 0.4752 0.5422 0.3782 0.0002 0.0779 Tusers 0.0000 0.2146 0.1057 0.0000 0.0000 0.0000 0.0000 0.0779</p>
+
+corr_bike1$r %&gt;%
+  kbl(caption=&quot;Pearson&#39;s Correlation Matrix for bike_final Dataset&quot;,
+       format= &quot;html&quot;, col.names = c(&quot;Season&quot;, &quot;Holiday&quot;, &quot;Day&quot;, &quot;Workday&quot;, &quot;Weather&quot;, &quot;TempF&quot;, &quot;Humidity&quot;, &quot;Wind&quot;, &quot;Tusers&quot;),
+      align=&quot;r&quot;) %&gt;%
+   kable_classic_2(full_width = F, html_font = &quot;helvetica&quot;)</code></pre>
+<table class=" lightable-classic-2" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Pearson’s Correlation Matrix for bike_final Dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Season
+</th>
+<th style="text-align:right;">
+Holiday
+</th>
+<th style="text-align:right;">
+Day
+</th>
+<th style="text-align:right;">
+Workday
+</th>
+<th style="text-align:right;">
+Weather
+</th>
+<th style="text-align:right;">
+TempF
+</th>
+<th style="text-align:right;">
+Humidity
+</th>
+<th style="text-align:right;">
+Wind
+</th>
+<th style="text-align:right;">
+Tusers
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Season
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+-0.004
+</td>
+<td style="text-align:right;">
+-0.033
+</td>
+<td style="text-align:right;">
+0.070
+</td>
+<td style="text-align:right;">
+-0.515
+</td>
+<td style="text-align:right;">
+0.090
+</td>
+<td style="text-align:right;">
+-0.072
+</td>
+<td style="text-align:right;">
+-0.278
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Holiday
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.102
+</td>
+<td style="text-align:right;">
+-0.253
+</td>
+<td style="text-align:right;">
+-0.005
+</td>
+<td style="text-align:right;">
+-0.025
+</td>
+<td style="text-align:right;">
+-0.019
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+-0.046
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Day
+</td>
+<td style="text-align:right;">
+-0.004
+</td>
+<td style="text-align:right;">
+-0.102
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.037
+</td>
+<td style="text-align:right;">
+0.038
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+-0.059
+</td>
+<td style="text-align:right;">
+0.008
+</td>
+<td style="text-align:right;">
+0.060
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Workday
+</td>
+<td style="text-align:right;">
+-0.033
+</td>
+<td style="text-align:right;">
+-0.253
+</td>
+<td style="text-align:right;">
+0.037
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.049
+</td>
+<td style="text-align:right;">
+0.005
+</td>
+<td style="text-align:right;">
+-0.026
+</td>
+<td style="text-align:right;">
+-0.187
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weather
+</td>
+<td style="text-align:right;">
+0.070
+</td>
+<td style="text-align:right;">
+-0.005
+</td>
+<td style="text-align:right;">
+0.038
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.210
+</td>
+<td style="text-align:right;">
+0.625
+</td>
+<td style="text-align:right;">
+-0.023
+</td>
+<td style="text-align:right;">
+-0.316
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TempF
+</td>
+<td style="text-align:right;">
+-0.515
+</td>
+<td style="text-align:right;">
+-0.025
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.049
+</td>
+<td style="text-align:right;">
+-0.210
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.139
+</td>
+<td style="text-align:right;">
+-0.033
+</td>
+<td style="text-align:right;">
+0.552
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Humidity
+</td>
+<td style="text-align:right;">
+0.090
+</td>
+<td style="text-align:right;">
+-0.019
+</td>
+<td style="text-align:right;">
+-0.059
+</td>
+<td style="text-align:right;">
+0.005
+</td>
+<td style="text-align:right;">
+0.625
+</td>
+<td style="text-align:right;">
+-0.139
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.137
+</td>
+<td style="text-align:right;">
+-0.271
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Wind
+</td>
+<td style="text-align:right;">
+-0.072
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+0.008
+</td>
+<td style="text-align:right;">
+-0.026
+</td>
+<td style="text-align:right;">
+-0.023
+</td>
+<td style="text-align:right;">
+-0.033
+</td>
+<td style="text-align:right;">
+-0.137
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.065
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tusers
+</td>
+<td style="text-align:right;">
+-0.278
+</td>
+<td style="text-align:right;">
+-0.046
+</td>
+<td style="text-align:right;">
+0.060
+</td>
+<td style="text-align:right;">
+-0.187
+</td>
+<td style="text-align:right;">
+-0.316
+</td>
+<td style="text-align:right;">
+0.552
+</td>
+<td style="text-align:right;">
+-0.271
+</td>
+<td style="text-align:right;">
+-0.065
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>corr_bike1$P %&gt;%
+  kbl(caption=&quot;Pearson&#39;s Correlation Matrix p-values for bike_final Dataset&quot;,
+       format= &quot;html&quot;, col.names = c(&quot;Season&quot;, &quot;Holiday&quot;, &quot;Day&quot;, &quot;Workday&quot;, &quot;Weather&quot;, &quot;TempF&quot;, &quot;Humidity&quot;, &quot;Wind&quot;, &quot;Tusers&quot;),
+      align=&quot;r&quot;) %&gt;%
+   kable_classic_2(full_width = F, html_font = &quot;helvetica&quot;)</code></pre>
+<table class=" lightable-classic-2" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Pearson’s Correlation Matrix p-values for bike_final Dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Season
+</th>
+<th style="text-align:right;">
+Holiday
+</th>
+<th style="text-align:right;">
+Day
+</th>
+<th style="text-align:right;">
+Workday
+</th>
+<th style="text-align:right;">
+Weather
+</th>
+<th style="text-align:right;">
+TempF
+</th>
+<th style="text-align:right;">
+Humidity
+</th>
+<th style="text-align:right;">
+Wind
+</th>
+<th style="text-align:right;">
+Tusers
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Season
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.129
+</td>
+<td style="text-align:right;">
+0.921
+</td>
+<td style="text-align:right;">
+0.378
+</td>
+<td style="text-align:right;">
+0.058
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.052
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Holiday
+</td>
+<td style="text-align:right;">
+0.129
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.901
+</td>
+<td style="text-align:right;">
+0.498
+</td>
+<td style="text-align:right;">
+0.606
+</td>
+<td style="text-align:right;">
+0.467
+</td>
+<td style="text-align:right;">
+0.215
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Day
+</td>
+<td style="text-align:right;">
+0.921
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.321
+</td>
+<td style="text-align:right;">
+0.302
+</td>
+<td style="text-align:right;">
+0.991
+</td>
+<td style="text-align:right;">
+0.112
+</td>
+<td style="text-align:right;">
+0.833
+</td>
+<td style="text-align:right;">
+0.106
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Workday
+</td>
+<td style="text-align:right;">
+0.378
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.321
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.992
+</td>
+<td style="text-align:right;">
+0.182
+</td>
+<td style="text-align:right;">
+0.890
+</td>
+<td style="text-align:right;">
+0.475
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weather
+</td>
+<td style="text-align:right;">
+0.058
+</td>
+<td style="text-align:right;">
+0.901
+</td>
+<td style="text-align:right;">
+0.302
+</td>
+<td style="text-align:right;">
+0.992
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.542
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TempF
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.498
+</td>
+<td style="text-align:right;">
+0.991
+</td>
+<td style="text-align:right;">
+0.182
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.378
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Humidity
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.606
+</td>
+<td style="text-align:right;">
+0.112
+</td>
+<td style="text-align:right;">
+0.890
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Wind
+</td>
+<td style="text-align:right;">
+0.052
+</td>
+<td style="text-align:right;">
+0.467
+</td>
+<td style="text-align:right;">
+0.833
+</td>
+<td style="text-align:right;">
+0.475
+</td>
+<td style="text-align:right;">
+0.542
+</td>
+<td style="text-align:right;">
+0.378
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.078
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tusers
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.215
+</td>
+<td style="text-align:right;">
+0.106
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.078
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>corr_bike2&lt;-rcorr(as.matrix(bike_final), type = &quot;spearman&quot;)
-corr_bike2</code></pre>
-<pre><code>     Season Holiday   Day Workday Weather TempF Humidity  Wind Tusers</code></pre>
-<p>Season 1.00 0.06 0.00 -0.03 0.07 -0.50 0.08 -0.09 -0.29 Holiday 0.06 1.00 -0.10 -0.25 -0.01 -0.02 -0.01 0.03 -0.04 Day 0.00 -0.10 1.00 0.04 0.06 0.00 -0.07 0.01 0.05 Workday -0.03 -0.25 0.04 1.00 -0.01 0.05 0.01 -0.04 -0.16 Weather 0.07 -0.01 0.06 -0.01 1.00 -0.22 0.54 -0.04 -0.27 TempF -0.50 -0.02 0.00 0.05 -0.22 1.00 -0.10 -0.01 0.56 Humidity 0.08 -0.01 -0.07 0.01 0.54 -0.10 1.00 -0.14 -0.20 Wind -0.09 0.03 0.01 -0.04 -0.04 -0.01 -0.14 1.00 -0.06 Tusers -0.29 -0.04 0.05 -0.16 -0.27 0.56 -0.20 -0.06 1.00</p>
-<p>n= 730</p>
-<p>P Season Holiday Day Workday Weather TempF Humidity Wind Tusers Season 0.1292 0.9217 0.3787 0.0587 0.0000 0.0251 0.0126 0.0000 Holiday 0.1292 0.0057 0.0000 0.8851 0.5169 0.7288 0.3981 0.2653 Day 0.9217 0.0057 0.3219 0.1288 0.9180 0.0720 0.8305 0.1667 Workday 0.3787 0.0000 0.3219 0.8812 0.1818 0.7490 0.2491 0.0000 Weather 0.0587 0.8851 0.1288 0.8812 0.0000 0.0000 0.2900 0.0000 TempF 0.0000 0.5169 0.9180 0.1818 0.0000 0.0069 0.7098 0.0000 Humidity 0.0251 0.7288 0.0720 0.7490 0.0000 0.0069 0.0002 0.0000 Wind 0.0126 0.3981 0.8305 0.2491 0.2900 0.7098 0.0002 0.0960 Tusers 0.0000 0.2653 0.1667 0.0000 0.0000 0.0000 0.0000 0.0960</p>
+
+corr_bike2$r %&gt;%
+  kbl(caption=&quot;Spearman&#39;s Correlation Matrix for bike_final Dataset&quot;,
+       format= &quot;html&quot;, col.names = c(&quot;Season&quot;, &quot;Holiday&quot;, &quot;Day&quot;, &quot;Workday&quot;, &quot;Weather&quot;, &quot;TempF&quot;, &quot;Humidity&quot;, &quot;Wind&quot;, &quot;Tusers&quot;),
+      align=&quot;r&quot;) %&gt;%
+   kable_classic_2(full_width = F, html_font = &quot;helvetica&quot;)</code></pre>
+<table class=" lightable-classic-2" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Spearman’s Correlation Matrix for bike_final Dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Season
+</th>
+<th style="text-align:right;">
+Holiday
+</th>
+<th style="text-align:right;">
+Day
+</th>
+<th style="text-align:right;">
+Workday
+</th>
+<th style="text-align:right;">
+Weather
+</th>
+<th style="text-align:right;">
+TempF
+</th>
+<th style="text-align:right;">
+Humidity
+</th>
+<th style="text-align:right;">
+Wind
+</th>
+<th style="text-align:right;">
+Tusers
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Season
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+-0.004
+</td>
+<td style="text-align:right;">
+-0.033
+</td>
+<td style="text-align:right;">
+0.070
+</td>
+<td style="text-align:right;">
+-0.504
+</td>
+<td style="text-align:right;">
+0.083
+</td>
+<td style="text-align:right;">
+-0.092
+</td>
+<td style="text-align:right;">
+-0.289
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Holiday
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.102
+</td>
+<td style="text-align:right;">
+-0.253
+</td>
+<td style="text-align:right;">
+-0.005
+</td>
+<td style="text-align:right;">
+-0.024
+</td>
+<td style="text-align:right;">
+-0.013
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+-0.041
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Day
+</td>
+<td style="text-align:right;">
+-0.004
+</td>
+<td style="text-align:right;">
+-0.102
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.037
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+-0.004
+</td>
+<td style="text-align:right;">
+-0.067
+</td>
+<td style="text-align:right;">
+0.008
+</td>
+<td style="text-align:right;">
+0.051
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Workday
+</td>
+<td style="text-align:right;">
+-0.033
+</td>
+<td style="text-align:right;">
+-0.253
+</td>
+<td style="text-align:right;">
+0.037
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.006
+</td>
+<td style="text-align:right;">
+0.049
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+<td style="text-align:right;">
+-0.043
+</td>
+<td style="text-align:right;">
+-0.163
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weather
+</td>
+<td style="text-align:right;">
+0.070
+</td>
+<td style="text-align:right;">
+-0.005
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+-0.006
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.216
+</td>
+<td style="text-align:right;">
+0.540
+</td>
+<td style="text-align:right;">
+-0.039
+</td>
+<td style="text-align:right;">
+-0.272
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TempF
+</td>
+<td style="text-align:right;">
+-0.504
+</td>
+<td style="text-align:right;">
+-0.024
+</td>
+<td style="text-align:right;">
+-0.004
+</td>
+<td style="text-align:right;">
+0.049
+</td>
+<td style="text-align:right;">
+-0.216
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.100
+</td>
+<td style="text-align:right;">
+-0.014
+</td>
+<td style="text-align:right;">
+0.560
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Humidity
+</td>
+<td style="text-align:right;">
+0.083
+</td>
+<td style="text-align:right;">
+-0.013
+</td>
+<td style="text-align:right;">
+-0.067
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+<td style="text-align:right;">
+0.540
+</td>
+<td style="text-align:right;">
+-0.100
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.136
+</td>
+<td style="text-align:right;">
+-0.204
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Wind
+</td>
+<td style="text-align:right;">
+-0.092
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+0.008
+</td>
+<td style="text-align:right;">
+-0.043
+</td>
+<td style="text-align:right;">
+-0.039
+</td>
+<td style="text-align:right;">
+-0.014
+</td>
+<td style="text-align:right;">
+-0.136
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+-0.062
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tusers
+</td>
+<td style="text-align:right;">
+-0.289
+</td>
+<td style="text-align:right;">
+-0.041
+</td>
+<td style="text-align:right;">
+0.051
+</td>
+<td style="text-align:right;">
+-0.163
+</td>
+<td style="text-align:right;">
+-0.272
+</td>
+<td style="text-align:right;">
+0.560
+</td>
+<td style="text-align:right;">
+-0.204
+</td>
+<td style="text-align:right;">
+-0.062
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>corr_bike2$P %&gt;%
+  kbl(caption=&quot;Spearman&#39;s Correlation Matrix p-values for bike_final Dataset&quot;,
+       format= &quot;html&quot;, col.names = c(&quot;Season&quot;, &quot;Holiday&quot;, &quot;Day&quot;, &quot;Workday&quot;, &quot;Weather&quot;, &quot;TempF&quot;, &quot;Humidity&quot;, &quot;Wind&quot;, &quot;Tusers&quot;),
+      align=&quot;r&quot;) %&gt;%
+   kable_classic_2(full_width = F, html_font = &quot;helvetica&quot;)</code></pre>
+<table class=" lightable-classic-2" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Spearman’s Correlation Matrix p-values for bike_final Dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Season
+</th>
+<th style="text-align:right;">
+Holiday
+</th>
+<th style="text-align:right;">
+Day
+</th>
+<th style="text-align:right;">
+Workday
+</th>
+<th style="text-align:right;">
+Weather
+</th>
+<th style="text-align:right;">
+TempF
+</th>
+<th style="text-align:right;">
+Humidity
+</th>
+<th style="text-align:right;">
+Wind
+</th>
+<th style="text-align:right;">
+Tusers
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Season
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.129
+</td>
+<td style="text-align:right;">
+0.922
+</td>
+<td style="text-align:right;">
+0.379
+</td>
+<td style="text-align:right;">
+0.059
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Holiday
+</td>
+<td style="text-align:right;">
+0.129
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.885
+</td>
+<td style="text-align:right;">
+0.517
+</td>
+<td style="text-align:right;">
+0.729
+</td>
+<td style="text-align:right;">
+0.398
+</td>
+<td style="text-align:right;">
+0.265
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Day
+</td>
+<td style="text-align:right;">
+0.922
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.322
+</td>
+<td style="text-align:right;">
+0.129
+</td>
+<td style="text-align:right;">
+0.918
+</td>
+<td style="text-align:right;">
+0.072
+</td>
+<td style="text-align:right;">
+0.830
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Workday
+</td>
+<td style="text-align:right;">
+0.379
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.322
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.881
+</td>
+<td style="text-align:right;">
+0.182
+</td>
+<td style="text-align:right;">
+0.749
+</td>
+<td style="text-align:right;">
+0.249
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weather
+</td>
+<td style="text-align:right;">
+0.059
+</td>
+<td style="text-align:right;">
+0.885
+</td>
+<td style="text-align:right;">
+0.129
+</td>
+<td style="text-align:right;">
+0.881
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.290
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TempF
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.517
+</td>
+<td style="text-align:right;">
+0.918
+</td>
+<td style="text-align:right;">
+0.182
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.007
+</td>
+<td style="text-align:right;">
+0.710
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Humidity
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+0.729
+</td>
+<td style="text-align:right;">
+0.072
+</td>
+<td style="text-align:right;">
+0.749
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.007
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Wind
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+0.398
+</td>
+<td style="text-align:right;">
+0.830
+</td>
+<td style="text-align:right;">
+0.249
+</td>
+<td style="text-align:right;">
+0.290
+</td>
+<td style="text-align:right;">
+0.710
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.096
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tusers
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.265
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.096
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div id="question-2" class="section level3">
-<h3>Question 2</h3>
+<div id="question-2-basline-lm-model" class="section level3">
+<h3>Question 2: Basline LM Model</h3>
 <p><strong>Build a baseline linear model for <code>Tusers</code>, with one numerical predictor.</strong><br />
 Write down the model equation as we did in class, like<br />
 <code>Tusers</code> = 0.28 + 5.29 <code>TempF</code>, just as an example.</p>
@@ -383,13 +1707,12 @@ Humidity
 </tbody>
 </table>
 </div>
-<div id="question-3" class="section level3">
-<h3>Question 3</h3>
+<div id="question-3-lm-model-for-tusers" class="section level3">
+<h3>Question 3: LM Model for Tusers</h3>
 <p><strong>Build a linear model for <code>Tusers</code>, with one numerical and one categorical predictor with at least 3 levels.</strong><br />
 Use the correlation matrix as a guide to decide on which variables to use. Find and interpret the results. Also write down the model equation for the different categorical factor levels on separate lines.</p>
 <p>Linear models for Tusers using Humidity and Weather. Weather was chosen as the categorical variable because it had the strongest negative coefficient among the categorical variables. Written below are the following linear models:</p>
 <p>Tuser = 373.384 + (-0.880)Humidity + (0)Weather1</p>
-<p>Tuser = 373.384 + (-0.880)Humidity + (-21.825)Weather2</p>
 <p>Tuser = 373.384 + (-0.880)Humidity + (-21.825)Weather2</p>
 <p>Tuser = 373.384 + (-0.880)Humidity + (-135.812)Weather3</p>
 <p>Tuser = 373.384 + (-0.880)Humidity + (-255.446)Weather4</p>
@@ -512,8 +1835,8 @@ Weather4
 </tbody>
 </table>
 </div>
-<div id="question-4" class="section level3">
-<h3>Question 4</h3>
+<div id="question-4-lm-model-for-interact-tusers" class="section level3">
+<h3>Question 4: LM Model for Interact Tusers</h3>
 <p><strong>Next extend the previous model for <code>Tusers</code>, but include the interaction term between the numerical and categorical variable.</strong><br />
 Again, write down the model equation for different categorical factor levels on separate lines. Comment of the slope and coefficients.</p>
 <p>The following are the linear models that have a interaction term between Humidity and Weather:</p>
@@ -641,10 +1964,11 @@ Humidity:Weather4
 </tbody>
 </table>
 </div>
-<div id="question-5" class="section level3">
-<h3>Question 5</h3>
+<div id="question-5-more-lm-model-interacts" class="section level3">
+<h3>Question 5: More LM Model Interacts</h3>
 <p><strong>Let us use this model equation <code>Tusers ~ TempF + Season + Wind:Weather + Season:Weather</code>.</strong><br />
 Notice the presence/absence of coefficients for the base-level categories. No need to write down the model equations this time. But comment on what is the difference between how the base-level is handled here and the previous models.</p>
+<p>The base-level model for the Season variable and the Season:Weather interaction variables are dropped from the linear model table. However, the base-line model of the Wind:Weather interaction variable is not dropped.</p>
 <pre class="r"><code>fit4 &lt;- lm(Tusers ~ TempF + Season + Wind:Weather + Season:Weather, data = bike_final)
 table4&lt;-summary(fit4)
 
@@ -934,30 +2258,23 @@ Season4:Weather3
 </tbody>
 </table>
 </div>
-<div id="question-6" class="section level3">
-<h3>Question 6</h3>
+<div id="question-6-anova-model-comparisons" class="section level3">
+<h3>Question 6: ANOVA Model Comparisons</h3>
 <p><strong>Compare the above models using ANOVA</strong><br />
 Interpret and comment on your results.</p>
-<pre class="r"><code>ANOVAresults&lt;-anova(fit1,fit2,fit3,fit4)
-
-ANOVAresults$Model &lt;-c(&quot;Fit 1&quot;,&quot;Fit 2&quot;,&quot;Fit 3&quot;,&quot;Fit 4&quot;)
-
-ANOVAresults1&lt;-select(ANOVAresults, 7,1,2,3,4,5,6)
-
-ANOVAresults1 %&gt;%
-  kbl(caption=&quot;ANOVA Model Comparison&quot;,
-       format= &quot;html&quot;, col.names = c(&quot;Model&quot;, &quot;Res.Df&quot;, &quot;RSS&quot;, &quot;DF&quot;, &quot;Sum of Sq&quot;,&quot;F&quot;,&quot;Pr(&gt;F)&quot;),
+<p>All models run through the ANOVA test display low p-values indicating that the group means within each model are different from one another. Therefore, the null hypothesis is rejected, and the groups of the categorical variables are different from one another.</p>
+<pre class="r"><code>aov1&lt;-tidy(aov(fit1))
+aov1 %&gt;%
+  kbl(caption=&quot;ANOVA Test for Model 1: lm(Tuser~Humidity)&quot;,
+       format= &quot;html&quot;, col.names = c(&quot;Res.Df&quot;, &quot;RSS&quot;, &quot;DF&quot;, &quot;Sum of Sq&quot;,&quot;F&quot;,&quot;Pr(&gt;F)&quot;),
       align=&quot;r&quot;) %&gt;%
    kable_classic_2(full_width = F, html_font = &quot;helvetica&quot;)</code></pre>
 <table class=" lightable-classic-2" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-ANOVA Model Comparison
+ANOVA Test for Model 1: lm(Tuser~Humidity)
 </caption>
 <thead>
 <tr>
-<th style="text-align:right;">
-Model
-</th>
 <th style="text-align:right;">
 Res.Df
 </th>
@@ -981,7 +2298,27 @@ Pr(&gt;F)
 <tbody>
 <tr>
 <td style="text-align:right;">
-Fit 1
+Humidity
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1180493
+</td>
+<td style="text-align:right;">
+1180493
+</td>
+<td style="text-align:right;">
+57.5
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+Residuals
 </td>
 <td style="text-align:right;">
 728
@@ -990,10 +2327,7 @@ Fit 1
 14935161
 </td>
 <td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
+20515
 </td>
 <td style="text-align:right;">
 NA
@@ -1002,15 +2336,64 @@ NA
 NA
 </td>
 </tr>
+</tbody>
+</table>
+<pre class="r"><code>aov2&lt;-tidy(aov(fit2))
+aov2 %&gt;%
+  kbl(caption=&quot;ANOVA Test for Model 2: lm(Tusers~Humidity+Weather)&quot;,
+       format= &quot;html&quot;, col.names = c(&quot;Res.Df&quot;, &quot;RSS&quot;, &quot;DF&quot;, &quot;Sum of Sq&quot;,&quot;F&quot;,&quot;Pr(&gt;F)&quot;),
+      align=&quot;r&quot;) %&gt;%
+   kable_classic_2(full_width = F, html_font = &quot;helvetica&quot;)</code></pre>
+<table class=" lightable-classic-2" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+ANOVA Test for Model 2: lm(Tusers~Humidity+Weather)
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Res.Df
+</th>
+<th style="text-align:right;">
+RSS
+</th>
+<th style="text-align:right;">
+DF
+</th>
+<th style="text-align:right;">
+Sum of Sq
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+Pr(&gt;F)
+</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td style="text-align:right;">
-Fit 2
+Humidity
 </td>
 <td style="text-align:right;">
-725
+1
 </td>
 <td style="text-align:right;">
-14159371
+1180493
+</td>
+<td style="text-align:right;">
+1180493
+</td>
+<td style="text-align:right;">
+60.4
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+Weather
 </td>
 <td style="text-align:right;">
 3
@@ -1019,7 +2402,10 @@ Fit 2
 775789
 </td>
 <td style="text-align:right;">
-20.4
+258596
+</td>
+<td style="text-align:right;">
+13.2
 </td>
 <td style="text-align:right;">
 0
@@ -1027,7 +2413,82 @@ Fit 2
 </tr>
 <tr>
 <td style="text-align:right;">
-Fit 3
+Residuals
+</td>
+<td style="text-align:right;">
+725
+</td>
+<td style="text-align:right;">
+14159371
+</td>
+<td style="text-align:right;">
+19530
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>aov3&lt;-tidy(aov(fit3))
+aov3 %&gt;%
+  kbl(caption=&quot;ANOVA Test for Model 3: lm(Tuser~Humidity:Weather)&quot;,
+       format= &quot;html&quot;, col.names = c(&quot;Res.Df&quot;, &quot;RSS&quot;, &quot;DF&quot;, &quot;Sum of Sq&quot;,&quot;F&quot;,&quot;Pr(&gt;F)&quot;),
+      align=&quot;r&quot;) %&gt;%
+   kable_classic_2(full_width = F, html_font = &quot;helvetica&quot;)</code></pre>
+<table class=" lightable-classic-2" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+ANOVA Test for Model 3: lm(Tuser~Humidity:Weather)
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Res.Df
+</th>
+<th style="text-align:right;">
+RSS
+</th>
+<th style="text-align:right;">
+DF
+</th>
+<th style="text-align:right;">
+Sum of Sq
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+Pr(&gt;F)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+Humidity:Weather
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+2069310
+</td>
+<td style="text-align:right;">
+517328
+</td>
+<td style="text-align:right;">
+26.7
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+Residuals
 </td>
 <td style="text-align:right;">
 725
@@ -1036,10 +2497,7 @@ Fit 3
 14046344
 </td>
 <td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-113028
+19374
 </td>
 <td style="text-align:right;">
 NA
@@ -1048,9 +2506,124 @@ NA
 NA
 </td>
 </tr>
+</tbody>
+</table>
+<pre class="r"><code>aov4&lt;-tidy(aov(fit4))
+aov4 %&gt;%
+  kbl(caption=&quot;ANOVA Test for Model 4: lm(Tusers~TempF+Season+Wind:Weather+Season:Weather)&quot;,
+       format= &quot;html&quot;, col.names = c(&quot;Res.Df&quot;, &quot;RSS&quot;, &quot;DF&quot;, &quot;Sum of Sq&quot;,&quot;F&quot;,&quot;Pr(&gt;F)&quot;),
+      align=&quot;r&quot;) %&gt;%
+   kable_classic_2(full_width = F, html_font = &quot;helvetica&quot;)</code></pre>
+<table class=" lightable-classic-2" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+ANOVA Test for Model 4: lm(Tusers~TempF+Season+Wind:Weather+Season:Weather)
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Res.Df
+</th>
+<th style="text-align:right;">
+RSS
+</th>
+<th style="text-align:right;">
+DF
+</th>
+<th style="text-align:right;">
+Sum of Sq
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+Pr(&gt;F)
+</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td style="text-align:right;">
-Fit 4
+TempF
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4906263
+</td>
+<td style="text-align:right;">
+4906263
+</td>
+<td style="text-align:right;">
+387.72
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+Season
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1133825
+</td>
+<td style="text-align:right;">
+377942
+</td>
+<td style="text-align:right;">
+29.87
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+Wind:Weather
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+752827
+</td>
+<td style="text-align:right;">
+188207
+</td>
+<td style="text-align:right;">
+14.87
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+Season:Weather
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+275060
+</td>
+<td style="text-align:right;">
+45843
+</td>
+<td style="text-align:right;">
+3.62
+</td>
+<td style="text-align:right;">
+0.002
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+Residuals
 </td>
 <td style="text-align:right;">
 715
@@ -1059,25 +2632,23 @@ Fit 4
 9047678
 </td>
 <td style="text-align:right;">
-10
+12654
 </td>
 <td style="text-align:right;">
-4998666
+NA
 </td>
 <td style="text-align:right;">
-39.5
-</td>
-<td style="text-align:right;">
-0
+NA
 </td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="question-7" class="section level3">
-<h3>Question 7</h3>
+<div id="question-7-more-lm-models-wcat.-vars." class="section level3">
+<h3>Question 7: More LM Models w/Cat. Vars.</h3>
 <p><strong>Try build a model with three categorical variables only, and their interaction terms.</strong><br />
 What are we really getting? Describe and explain.</p>
+<p>The following linear model are displaying coefficients for each interaction variable and for each rank for each categorical variable. The different signs of each coefficient indicate that different interaction variables have either positive or negative association with Tusers.</p>
 <pre class="r"><code>fit5 &lt;- lm(Tusers ~ Weather:Humidity+ Day:Humidity + Season:Humidity, data = bike_final)
 table5&lt;-summary(fit5)
 
