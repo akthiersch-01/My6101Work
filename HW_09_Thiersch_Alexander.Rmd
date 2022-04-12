@@ -50,16 +50,49 @@ The questions listed here are the basic guidelines, not the only goal, in this h
 
 **Import the dataset into R**  
 Import the dataset into R, and call it titanic_orig, and explore it little to get the overall picture of the dataset. Eventually we would like to see what affected survival in the tragedy.  
+```{r}
+library(readr)
+library(tidyr)
+titanic_orig <- read_csv("/Users/akthiersch/Desktop/Datasets/Titanic.csv")
+#View(titanic_orig)
+
+
+
+```
 
 
 ### Question 2 
 **Age**  
 One of the main factors we will try is Age. How many missing values are there for the variable `age`? If not too many, we should just clean those up and subset those out.  
 
+There are a total of 177 missing values for the variable age.
+
+```{r}
+sum(is.na(titanic_orig$age))
+
+titanic_orig=titanic_orig %>% drop_na()
+
+```
+
+
 ### Question 3  
 **More clean up**  
 While we are cleaning up the data, if we were to use sibsp and parch in our analysis, even though they are legitimately ratio level variables, we might not expect doubling the number of siblings necessarily double the effects on survival. For this reason, we should change these two variables to factor levels. Also change the other ones that you find imported as the wrong data type.  
 
+The variables that were converted to factors include sibsp, parch, pclass, and survived.
+
+```{r}
+titanic_orig$sibsp=as.factor(titanic_orig$sibsp)
+
+titanic_orig$parch=as.factor(titanic_orig$parch)
+
+titanic_orig$pclass=as.factor(titanic_orig$pclass)
+
+titanic_orig$survived=as.factor(titanic_orig$survived)
+
+str(titanic_orig)
+
+```
 
 ## Pre-logistic Regression
 
@@ -67,15 +100,39 @@ While we are cleaning up the data, if we were to use sibsp and parch in our anal
 **Survival and age**  
 Before using our newly learned technique with logistic regression, let’s go old school, and use some prior knowledge to try find an answer. Does the data support that `age` very much affects `survival`?
 
+The following two sampled t-test suggests that there is a statistically significant difference at the 5% significance level between the group means of passengers that survived and died. This is indicated by the low p-value of 0.03 which is lower than the 5% significance level critical value of 0.05.
+
+```{r}
+t.test(age~survived, data=titanic_orig)
+
+
+```
+
 
 ### Question 5  
 **Survival and gender**  
 Similarly, does the data support `sex` has an effect on `survival`? 
 
+The following Chi-squared test suggests that sex and survival have a significant relationship due to the low p-value. This is because the p-value is <2e-16 which is smaller than the 5% critical value, indicating that the difference between the categorical variable is statistically significant at the 5% significance level.
+
+```{r}
+chisq.test(titanic_orig$survived, titanic_orig$sex, correct=FALSE)
+
+
+
+```
 
 ### Question 6   
 **Survival and pclass**  
 Another big question is, does the data support Ticket class `pclass` has an effect on `survival`? 
+
+The following Chi-squared test suggests that pclass and survival have a significant relationship due to the low p-value. This is because the p-value is <2e-16 which is smaller than the 5% critical value, indicating that the difference between the categorical variable is statistically significant at the 5% significance level.
+
+```{r}
+chisq.test(titanic_orig$survived, titanic_orig$pclass, correct=FALSE)
+
+
+```
 
 
 ## Logistic Regression
@@ -85,9 +142,35 @@ Another big question is, does the data support Ticket class `pclass` has an effe
 Now let us build a logit model with age+pclass as predictors, and analyze the results. Remember to do all the model evaluation steps. Is the model a good one?
 
 
+```{r}
+#summary(titanic_orig)
+
+#Training Set
+train<-titanic_orig[1:623,]
+
+#Testing Set
+test<-titanic_orig[624:712,]
+
+
+#model1 <- glm(survived ~ age+pclass,data=train,family="binomial")
+
+model1 <- glm(survived ~ age+pclass,data=titanic_orig,family="binomial")
+summary(model1)
+
+```
+
+
 ### Question 8  
 **More features**  
 Can we improve the model? Let us also throw in `sex` as a predictor. How’s the model now?
+
+
+```{r}
+
+model <- glm(survived ~ age+pclass+sex,data=titanic_orig,family="binomial")
+
+```
+
 
 
 ### Question 9  
