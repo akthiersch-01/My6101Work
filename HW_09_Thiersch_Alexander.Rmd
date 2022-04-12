@@ -53,6 +53,10 @@ Import the dataset into R, and call it titanic_orig, and explore it little to ge
 ```{r}
 library(readr)
 library(tidyr)
+library("regclass")
+library("ResourceSelection")
+library("pROC")
+library(kableExtra)
 titanic_orig <- read_csv("/Users/akthiersch/Desktop/Datasets/Titanic.csv")
 #View(titanic_orig)
 
@@ -103,7 +107,18 @@ Before using our newly learned technique with logistic regression, let’s go ol
 The following two sampled t-test suggests that there is a statistically significant difference at the 5% significance level between the group means of passengers that survived and died. This is indicated by the low p-value of 0.03 which is lower than the 5% significance level critical value of 0.05.
 
 ```{r}
-t.test(age~survived, data=titanic_orig)
+t.test_1<-t.test(age~survived, data=titanic_orig)
+
+table_t.test <- data.frame(statisitc = c(t.test_1$statistic))
+table_t.test <- rbind(table_t.test, t.test_1$parameter)
+table_t.test <- rbind(table_t.test, t.test_1$p.value)
+rownames(table_t.test) <- c("t", "df", "p-value")
+table_t.test %>%
+  kbl(caption="t-test: age~survived",
+       format= "html", col.names = c(""),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
 
 
 ```
@@ -116,9 +131,17 @@ Similarly, does the data support `sex` has an effect on `survival`?
 The following Chi-squared test suggests that sex and survival have a significant relationship due to the low p-value. This is because the p-value is <2e-16 which is smaller than the 5% critical value, indicating that the difference between the categorical variable is statistically significant at the 5% significance level.
 
 ```{r}
-chisq.test(titanic_orig$survived, titanic_orig$sex, correct=FALSE)
+chisq.test_1<-chisq.test(titanic_orig$survived, titanic_orig$sex, correct=FALSE)
 
-
+table_chisq.test_1 <- data.frame(statisitc = c(chisq.test_1$statistic))
+table_chisq.test_1 <- rbind(table_chisq.test_1, chisq.test_1$parameter)
+table_chisq.test_1 <- rbind(table_chisq.test_1, chisq.test_1$p.value)
+rownames(table_chisq.test_1) <- c("X-Squared", "df", "p-value")
+table_chisq.test_1 %>%
+  kbl(caption="Chi-Squared Test: sex~survived",
+       format= "html", col.names = c(""),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
 
 ```
 
@@ -129,8 +152,17 @@ Another big question is, does the data support Ticket class `pclass` has an effe
 The following Chi-squared test suggests that pclass and survival have a significant relationship due to the low p-value. This is because the p-value is <2e-16 which is smaller than the 5% critical value, indicating that the difference between the categorical variable is statistically significant at the 5% significance level.
 
 ```{r}
-chisq.test(titanic_orig$survived, titanic_orig$pclass, correct=FALSE)
+chisq.test_2<-chisq.test(titanic_orig$survived, titanic_orig$pclass, correct=FALSE)
 
+table_chisq.test_2 <- data.frame(statisitc = c(chisq.test_2$statistic))
+table_chisq.test_2 <- rbind(table_chisq.test_2, chisq.test_2$parameter)
+table_chisq.test_2 <- rbind(table_chisq.test_2, chisq.test_2$p.value)
+rownames(table_chisq.test_2) <- c("X-Squared", "df", "p-value")
+table_chisq.test_2 %>%
+  kbl(caption="Chi-Squared Test: pclass~survived",
+       format= "html", col.names = c(""),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
 
 ```
 
@@ -141,21 +173,46 @@ chisq.test(titanic_orig$survived, titanic_orig$pclass, correct=FALSE)
 **Survival and age + pclass**  
 Now let us build a logit model with age+pclass as predictors, and analyze the results. Remember to do all the model evaluation steps. Is the model a good one?
 
+The logit model has coefficients that are all statistically significant at the 5% significance level as indicated by the low p-values for each variables coefficients. The low p-value of the Holsem Test indicates that the model is a good fit for the data. Additionally, the area under the curve ROC value is 0.744, indicating that the model is a somewhat decent fit for the data but not the best fit because the value is not larger than 0.800. Finally, the McFadden psuedo-R-squared value for the model 0.142, indicating the model is not a good fit because the value is below 0.2. These goodness-of-fit values suggest that the model is a poor fit of the data.
 
-```{r}
-#summary(titanic_orig)
-
-#Training Set
-train<-titanic_orig[1:623,]
-
-#Testing Set
-test<-titanic_orig[624:712,]
-
-
-#model1 <- glm(survived ~ age+pclass,data=train,family="binomial")
-
+```{r, results='asis'}
 model1 <- glm(survived ~ age+pclass,data=titanic_orig,family="binomial")
-summary(model1)
+table1<-summary(model1)
+
+table1$coefficients %>%
+  kbl(caption="Logit Regession: glm(survived ~ age + pclass)",
+       format= "html", col.names = c("Estimate", "Std. Error", "z-value", "Pr(>|z|)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+#Confusion Matrix
+xkabledply(confusion_matrix(model1), title = "Confusion matrix from Logit Model" )
+
+#Hoslem Test
+model1_Hoslem = hoslem.test(titanic_orig$survived, fitted(model1)) 
+
+Hoslem_table1 <- data.frame(statisitc = c(model1_Hoslem$statistic))
+Hoslem_table1 <- rbind(Hoslem_table1, model1_Hoslem$parameter)
+Hoslem_table1 <- rbind(Hoslem_table1, model1_Hoslem$p.value)
+rownames(Hoslem_table1) <- c("X-Squared", "df", "p-value")
+Hoslem_table1 %>%
+  kbl(caption="Hoslem Test: Model 1 glm(survived~age+pclass)",
+       format= "html", col.names = c(""),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+#PROC
+prob1=predict(model1, type = "response" )
+titanic_orig$prob1=prob1
+h <- roc(survived~prob1, data=titanic_orig)
+auc(h) # area-under-curve prefer 0.8 or higher.
+plot(h, main="Area Under the Curve Plot: Model 1 - Sensitivity v. Specificity")
+
+#McFadden
+model1_NullLogit <- glm(survived ~ 1, data = titanic_orig, family = "binomial")
+mcFadden1 = 1 - logLik(model1)/logLik(model1_NullLogit)
+mcFadden1
+
 
 ```
 
@@ -164,10 +221,47 @@ summary(model1)
 **More features**  
 Can we improve the model? Let us also throw in `sex` as a predictor. How’s the model now?
 
+The logit model has coefficients that are all statistically significant at the 5% significance level as indicated by the low p-values for each variables coefficients. The low p-value of the Holsem Test indicates that the model is a good fit for the data. Additionally, the area under the curve ROC value is 0.851, indicating that the model is a good fit for the data because the value is larger than 0.800. Finally, the McFadden psuedo-R-squared value for the model 0.327, indicating the model is a decent fit because the value is close to 0.400. These goodness-of-fit values suggest that the model is a good fit for the data. This model is better than the previous model specifically because of the larger Holsem Test value.
 
-```{r}
+```{r, results='asis'}
+#Logit Model
+model2 <- glm(survived ~ age+pclass+sex,data=titanic_orig,family="binomial")
+table2<-summary(model2)
 
-model <- glm(survived ~ age+pclass+sex,data=titanic_orig,family="binomial")
+table2$coefficients %>%
+  kbl(caption="Logit Regession: glm(survived ~ age + pclass + sex)",
+       format= "html", col.names = c("Estimate", "Std. Error", "z-value", "Pr(>|z|)"),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+#Confusion Matrix
+xkabledply(confusion_matrix(model2), title = "Confusion matrix from Logit Model" )
+
+#Hosmer and Lemeshow test
+model2_Hoslem = hoslem.test(titanic_orig$survived, fitted(model2)) 
+
+Hoslem_table2 <- data.frame(statisitc = c(model2_Hoslem$statistic))
+Hoslem_table2 <- rbind(Hoslem_table2, model2_Hoslem$parameter)
+Hoslem_table2 <- rbind(Hoslem_table2, model2_Hoslem$p.value)
+rownames(Hoslem_table2) <- c("X-Squared", "df", "p-value")
+Hoslem_table2 %>%
+  kbl(caption="Hoslem Test: Model 2 glm(survived~age+pclass+sex)",
+       format= "html", col.names = c(""),
+      align="r") %>%
+   kable_classic_2(full_width = F, html_font = "helvetica")
+
+#PROC
+prob2=predict(model2, type = "response" )
+titanic_orig$prob2=prob2
+g <- roc(survived~prob2, data=titanic_orig)
+auc(g) # area-under-curve prefer 0.8 or higher.
+plot(g, main="Area Under the Curve Plot: Model 2 - Sensitivity v. Specificity")
+
+#McFadden
+model2_NullLogit <- glm(survived ~ 1, data = titanic_orig, family = "binomial")
+mcFadden2 = 1 - logLik(model2)/logLik(model2_NullLogit)
+mcFadden2
+
 
 ```
 
@@ -179,6 +273,13 @@ According to the last model, what is the chance of survival for a female, age 10
 
 ## Interpretation  
 
+The chance of survival for a female, age 10, second class passenger, is 2.098%. The chance of survival for a male, age 20, first class passenger, is 0.515%. These percentages suggest that females had a higher chance of survival than males when the titanic sank.
+
 ### Question 10  
 *Summary*  
 With all the results you obtained above, how would you present a high-level summary of the findings? Are the results surprising or expected? You might need to dig a little deeper than just the numbers, the test results/p-values, and the model statistics. This is a question about who we are, … in the face of death. 
+
+The models and tests above suggest that the age, pclass, and sex variables are important to include in a logit regression that predict survivalist for passengers on the Titanic. In the the context of the Titanic, women and people of a wealthier ticket class had a higher chance of survival than males or those of a lower ticket class. Additionally, younger people also had a higher chance of survival than older people. These trends in serviceability are supported by the variable coefficients in each logit model, specifically Model 2. If I were reporting a high-level summary of my findings I would conclude that in the face of death, that passengers of a wealthier ticket class that were likely young and women were prioritized in escaping the sinking ship ensuring their survival. 
+
+
+
