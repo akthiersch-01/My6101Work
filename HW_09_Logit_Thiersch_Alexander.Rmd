@@ -106,7 +106,7 @@ Before using our newly learned technique with logistic regression, let’s go ol
 
 The following two sampled t-test suggests that there is a statistically significant difference at the 5% significance level between the group means of passengers that survived and died. This is indicated by the low p-value of 0.03 which is lower than the 5% significance level critical value of 0.05.
 
-```{r}
+```{r, results='asis'}
 t.test_1<-t.test(age~survived, data=titanic_orig)
 
 table_t.test <- data.frame(statisitc = c(t.test_1$statistic))
@@ -130,7 +130,7 @@ Similarly, does the data support `sex` has an effect on `survival`?
 
 The following Chi-squared test suggests that sex and survival have a significant relationship due to the low p-value. This is because the p-value is <2e-16 which is smaller than the 5% critical value, indicating that the difference between the categorical variable is statistically significant at the 5% significance level.
 
-```{r}
+```{r, results='asis'}
 chisq.test_1<-chisq.test(titanic_orig$survived, titanic_orig$sex, correct=FALSE)
 
 table_chisq.test_1 <- data.frame(statisitc = c(chisq.test_1$statistic))
@@ -151,7 +151,7 @@ Another big question is, does the data support Ticket class `pclass` has an effe
 
 The following Chi-squared test suggests that pclass and survival have a significant relationship due to the low p-value. This is because the p-value is <2e-16 which is smaller than the 5% critical value, indicating that the difference between the categorical variable is statistically significant at the 5% significance level.
 
-```{r}
+```{r, results='asis'}
 chisq.test_2<-chisq.test(titanic_orig$survived, titanic_orig$pclass, correct=FALSE)
 
 table_chisq.test_2 <- data.frame(statisitc = c(chisq.test_2$statistic))
@@ -265,15 +265,13 @@ mcFadden2
 
 ```
 
-
-
 ### Question 9  
 **Sample Predictions**  
 According to the last model, what is the chance of survival for a female, age 10, second class passenger? And a male, age 20, first class passenger?
 
 ## Interpretation  
 
-The chance of survival for a female, age 10, second class passenger, is 2.098%. The chance of survival for a male, age 20, first class passenger, is 0.515%. These percentages suggest that females had a higher chance of survival than males when the titanic sank.
+The chance of survival for a female, age 10, second class passenger, is 2.098%. The chance of survival for a male, age 20, first class passenger, is 0.515%. These percentages suggest that females had a higher chance of survival than males when the Titanic sank.
 
 ### Question 10  
 *Summary*  
