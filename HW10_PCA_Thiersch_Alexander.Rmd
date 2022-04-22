@@ -1,8 +1,7 @@
 ---
 title: "Intro to DS - PCA / PCR"
-author: ""
-date: "today"
-# date: "`r Sys.Date()`"
+author: "Alexander Thiersch"
+date: "`r Sys.Date()`"
 output:
   html_document:
     code_folding: hide
@@ -27,6 +26,15 @@ options(scientific=T, digits = 3)
 # use scipen=999 to prevent scientific notation at all times
 ```
 
+```{r}
+#Load Relevant Libraries
+library(readr)
+library(corrplot)
+library(kableExtra)
+library(shiny)
+
+```
+
 
 # USDA Nutrient Dataset  
 This data was from USDA National Nutrient dataset, pre-processed by @craigkelly from data.world. 
@@ -37,16 +45,49 @@ This data was from USDA National Nutrient dataset, pre-processed by @craigkelly 
 **Import the dataset**  
 Import the dataset into R. There should be 45 variables. Take a quick look at the data. Just str, head, and tail will do for now.  
 
+Dataset Imported.
+```{r, results='asis'}
+USDANationalNutrient <- read_csv("/Users/akthiersch/Desktop/Datasets/USDANationalNutrient.csv")
+
+#str(USDANationalNutrient)
+#xkabledply(head(USDANationalNutrient))
+#xkabledply(tail(USDANationalNutrient))
+
+```
+
 
 ### Question 2  
 **Drop the first 7 variables**  
 Save the rest as a dataframe, and call it `nndf1`.   
+
+Dataset has been renamed to `nndf1`.
+
+```{r, results='asis'}
+nndf1=subset(USDANationalNutrient, select=-c(1,2,3,4,5,6,7))
+
+#head(nndf1)
+#str(nndf1)
+
+```
 
 ## OLS full model  
 
 ### Question 3  
 **Issue with full OLS models**  
 All the variables are now numerical. Let us build a quick model (full model) to predict `Energy_kcal`, and another full model to predict `VitB12_mcg`. (No fancy output is required.) Vegetarian diet can often be low on B12, which makes one get tired easier. Having a model could be useful. What are the NAs for the coefficients mean? (Try google.) 
+
+NA values for coefficients occur because the estimate itself is not estimable. This can happen for multiple reasons including exact collinearity and low observations to estimate the variable,  
+
+```{r}
+engkcal_model1<-lm(Energy_kcal~.,data=nndf1)
+summary(engkcal_model1)
+
+vitB12_model2<-lm(VitB12_mcg~.,data=nndf1)
+summary(vitB12_model2)
+
+```
+
+
 
 ### Question 4  
 **Fix duplicate/collinear variables**  
@@ -58,10 +99,29 @@ You probably realize where the problem comes from. Alright then, let us
 
 Obtain a simple correlation matrix for the dataframe. If you use the function `xkabledply()` on the correlation matrix, it will print out a nice scrollable table for html and your console output.  
 
+```{r, results='asis'}
+nndf1_mod1 <- subset(nndf1, select = c(1:23))
+
+nndf<- scale(nndf1_mod1, center=TRUE, scale=TRUE)
+
+nndf_mat<-nndf
+
+M = cor(nndf_mat)
+corrplot(M, method = 'square')
+
+```
+
 
 ### Question 5  
 **VitB12_mcg**  
 Build a quick full model again for “VitB12_mcg”. What is the $R^2$ value? Notice that using PCA won’t improve the $R^2$. It will only match it if you use all 22 PC-components (1 target, 22 explanatory variables). However, this can be the baseline number to compare.  
+
+The multiple R-squared value is 0.5867.
+
+```{r}
+viB12_model3<-lm(VitB12_mcg~.,data=nndf1_mod1)
+summary(viB12_model3)
+```
 
 ## PCA  
 
@@ -72,20 +132,49 @@ Instead of PCR, let us run the PCA on this dataset. The dataframe is already cen
 (Ans: Riboflavin_mg at -0.3413, Niacin_mg at -0.3378, and so forth.)  
 And which are the four strongest for `PC2`?   
 
+The four strongest components in PC1 include Riboflavin_mg at -0.3413, Niacin_mg at -0.3378, VitB6_mg at -0.31566282 and Iron_mg at -0.29985690.
+
+The four strongest components in PC2 include Carb_g at 0.44341644, Sugar_g at 0.35876913, VitB12_mcg at 0.35504461, and  Protein_g at -0.34339677.
+ 
+ 
+
+```{r}
+nnpcomp <- prcomp(nndf)
+```
+
+
+
 ### Question 7  
 **BiPlots**  
-Make a biplot between `PC1` and `PC2` like this: `biplot( nnpcomp, c(1,2), scale=0 )`. Continue to plot `PC1` with `PC3` (use `c(1,3)`), `c(1,4)`, `c(1,5)`, and `c(1,6)`. Also make biplots for `c(2,3)`, `c(3,4)`, `c(4,5)`, `c(5,6)`.     
+Make a biplot between `PC1` and `PC2` like this: `biplot( nnpcomp, c(1,2), scale=0 )`. Continue to plot `PC1` with `PC3` (use `c(1,3)`), `c(1,4)`, `c(1,5)`, and `c(1,6)`. Also make biplots for `c(2,3)`, `c(3,4)`, `c(4,5)`, `c(5,6)`.   
+
+```{r}
+biplot(nnpcomp, c(1,2), scale=0, main='Biplot for PC2 v. PC1')
+biplot(nnpcomp, c(1,3), scale=0, main='Biplot for PC3 v. PC1')
+biplot(nnpcomp, c(1,5), scale=0, main='Biplot for PC5 v. PC1')
+biplot(nnpcomp, c(1,6), scale=0, main='Biplot for PC6 v. PC1')
+biplot(nnpcomp, c(2,3), scale=0, main='Biplot for PC3 v. PC2')
+biplot(nnpcomp, c(3,4), scale=0, main='Biplot for PC4 v. PC3')
+biplot(nnpcomp, c(4,5), scale=0, main='Biplot for PC5 v. PC4')
+biplot(nnpcomp, c(5,6), scale=0, main='Biplot for PC6 v. PC5')
+```
+
 
 ### Question 8  
 **PVE**  
 Does the plots show that `PC1` capture much more variance than `PC2`? `PC6`? (Of course we can confirm these with the PVE plot and calculations if we like. It is not required in this hw here.)     
+
+Yes, PC1 capture more of the variance than PC2 and PC6. This can be determined by the large length of the x axis that the PC1 is on. The variance decrease with each subsequent principle component.
+
 
 ### Question 9  
 **Interesting plots**  
 If you look at the plot between `PC1` and `PC2`, it looks like a boomerang shape. (See image file in the hw zip.) Recall that `PC1` and `PC2` consists of rather different linear combinations of the original variables. And `PC1`-`PC2` have zero correlation. The chart shows us although `PC1` and `PC2` are overall un-correlated, when `PC1` change, there are only two different trends that `PC2` will change, as if there are only two types of nutrients in the 8000+ observations. Maybe these two kinds of food/items should be analyzed separately with two different models. These are some of the patterns and structures that PCA might be able to reveal.  
 
 At any rate, do you see other charts showing unexpected patterns?
-     
+
+Another unexpected pattern is the biplot between PC3 and PC4. This plot has a strange vertical upward pattern between PC3 and PC4. 
+
 ## Optional  
 
 We will skip the model building using PCR here as it turns out not a productive exercise in that direction. While we are having this huge dataset, with 23 variables, this is actually a good candidate for performing the feature selection using leaps.  
