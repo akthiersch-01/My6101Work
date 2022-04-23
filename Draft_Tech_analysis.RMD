@@ -102,7 +102,7 @@ For more information, see [the measures online](https://www.countyhealthrankings
 ```{r import, results='hide', echo=F}
 
 # import csv as dataframe
-dframe <- data.frame(read.csv("data/processed/analytic_data_2016_2021_with_regions.csv"))
+dframe <- data.frame(read.csv("/Users/akthiersch/Desktop/Datasets/analytic_data_2016_2021_with_regions.csv"))
 #View(dframe)
 
 # convert variables to factor
@@ -1380,3 +1380,78 @@ Variables | rho | p-value |
 ***
 
 Based on the small p-values below 0.05, we can reject the null hypothesis and conclude that the correlations between the variables are significantly different from zero These findings suggest that there is a real relationship between mental health and income inequality.
+
+```{r}
+#Regression Tree Testing
+
+#Relevant Packages
+library(rpart)
+library(rattle)
+library(pROC)
+library(tree)
+
+```
+
+
+
+```{r}
+#Regions
+'''
+# subset ranked data by region
+ranked_MW <- ranked %>% subset(region=="Midwest")
+ranked_NE <- ranked %>% subset(region=="Northeast")
+ranked_SO <- ranked %>% subset(region=="South")
+ranked_WE <- ranked %>% subset(region=="West")
+'''
+
+
+
+```
+
+```{r}
+# remove NA values
+
+ranked <- na.omit(ranked)
+
+# put salary on log scale and fit reg. | distress rate
+treefit <- tree(log(mental_distress_rate) ~ inequality + median_inc + child_poverty, data=ranked)
+summary(treefit)
+
+plot(treefit) 
+text(treefit,cex=0.75)
+```
+
+```{r}
+#treefitRpart <- rpart(log(mental_distress_rate) ~ inequality + median_inc + child_poverty, data=ranked, control = list(maxdepth = 20, cp=0.009)) # 8 terminal/leaf nodes, but slightly different than the nodes from the tree function above. 
+
+treefitRpart <- rpart(log(mental_health_days) ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio, data=ranked, control = list(maxdepth = 20, cp=0.009)) 
+
+#treefitRpart <- rpart(log(mental_distress_rate) ~ inequality + median_inc + child_poverty, data=ranked, control=rpart.control(cp=.0001)) 
+
+#treefit
+#summary(treefitRpart) 
+printcp(treefitRpart)
+fancyRpartPlot(treefitRpart)
+
+
+
+```
+
+```{r}
+#predict(treefitRpart)
+
+#identify best cp value to use
+best <- treefitRpart$cptable[which.min(treefitRpart$cptable[,"xerror"]),"CP"]
+
+#produce a pruned tree based on the best cp value
+pruned_tree <- prune(treefitRpart, cp=best)
+
+#plot the pruned tree
+prp(pruned_tree,
+    faclen=0, #use full names for factor labels
+    extra=1, #display number of obs. for each terminal node
+    roundint=F, #don't round to integers in output
+    digits=5) #display 5 decimal places in output
+
+```
+
