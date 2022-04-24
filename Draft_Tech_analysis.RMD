@@ -1389,7 +1389,10 @@ library(rpart)
 library(rattle)
 library(pROC)
 library(tree)
-
+library(MASS)
+library(caTools)
+library(ModelMetrics)
+library(modelr)
 ```
 
 
@@ -1424,34 +1427,212 @@ text(treefit,cex=0.75)
 ```{r}
 #treefitRpart <- rpart(log(mental_distress_rate) ~ inequality + median_inc + child_poverty, data=ranked, control = list(maxdepth = 20, cp=0.009)) # 8 terminal/leaf nodes, but slightly different than the nodes from the tree function above. 
 
-treefitRpart <- rpart(log(mental_health_days) ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio, data=ranked, control = list(maxdepth = 20, cp=0.009)) 
+model1 <- rpart(mental_health_days ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio, data=ranked, control = list(maxdepth = 11, cp=0.009)) 
 
 #treefitRpart <- rpart(log(mental_distress_rate) ~ inequality + median_inc + child_poverty, data=ranked, control=rpart.control(cp=.0001)) 
 
-#treefit
-#summary(treefitRpart) 
-printcp(treefitRpart)
-fancyRpartPlot(treefitRpart)
-
+#Summary
+summary(model1) 
+printcp(model1)
+fancyRpartPlot(model1)
 
 
 ```
 
 ```{r}
-#predict(treefitRpart)
 
-#identify best cp value to use
-best <- treefitRpart$cptable[which.min(treefitRpart$cptable[,"xerror"]),"CP"]
+tree <- tree(mental_health_days ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio, data=ranked, control = list(maxdepth = 8, cp=0.009)) # Fits tree 
 
-#produce a pruned tree based on the best cp value
-pruned_tree <- prune(treefitRpart, cp=best)
+prune.rpart(treefitRpart, best=5, cp=0.009) # Returns best pruned tree 
 
-#plot the pruned tree
-prp(pruned_tree,
-    faclen=0, #use full names for factor labels
-    extra=1, #display number of obs. for each terminal node
-    roundint=F, #don't round to integers in output
-    digits=5) #display 5 decimal places in output
+prune.tree(tree, best=5, cp=0.009)
+#prune.rpart(treefitRpart,best=5, newdata=ranked, cp=0.009)  # no test data set, so use training data
+
+my.tree.seq = prune.tree(tree, cp=0.009) # Sequence of pruned 
+
+#my.tree.seq = prune.rpart(treefitRpart, cp=0.009) # Sequence of pruned 
+# tree sizes/errors
+
+plot(my.tree.seq) # Plots error/deviance vs size of tree (# of terminal nodes being used.)
+
+my.tree.seq$dev # Vector of error
+
+# rates for prunings, in order
+opt.trees = which(my.tree.seq$dev == min(my.tree.seq$dev))
+
+# Positions of
+# optimal (with respect to error) trees 
+min(my.tree.seq$size[opt.trees])
+
+
+```
+
+
+
+```{r}
+#Create train test set
+'''
+split_dummy <- sample(c(rep(0, 0.7 * nrow(ranked)),  # Create dummy for splitting
+                        rep(1, 0.3 * nrow(ranked))))
+split_dummy                                        # Print dummy
+
+
+data_train <- ranked[split_dummy == 0, ]
+
+data_test <- ranked[split_dummy == 1, ]    
+
+head(data_train)
+
+head(data_test)
+'''
+
+set.seed(123)   #  set seed to ensure you always have same random numbers generated
+sample = sample.split(ranked, SplitRatio = 0.8) # splits the data in the ratio mentioned in SplitRatio. After splitting marks these rows as logical TRUE and the the remaining are marked as logical FALSE
+train_set1 =subset(ranked, sample ==TRUE)# creates a training dataset named train1 with rows which are marked as TRUE
+
+test_set1=subset(ranked, sample==FALSE)
+
+head(train_set1)
+
+head(test_set1)
+
+```
+
+
+```{r}
+model2 <- tree(mental_health_days ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio, data=train_set1)
+
+summary(model2) 
+printcp(model2)
+#fancyRpartPlot(model2)
+plot(model2)
+text(model2,cex=0.75)
+
+
+
+prune.tree(model2, best=5)
+
+prune.tree(model2, best=5, newdata=test_set1, method = "deviance")
+
+# Sequence of pruned tree sizes/errors
+model2_tree_seq = prune.tree(model2) 
+plot(model2_tree_seq) # error versus plot size
+# Vector of error rates 
+# for prunings, in order 
+deviance1 <- model2_tree_seq$dev
+deviance1
+
+pchisq( deviance1[ length(deviance1) ], length(test_set1$mental_health_days)-1 , lower.tail = F )
+pchisq( deviance1[ length(deviance1)-6 ], length(test_set1$mental_health_days)-7 , lower.tail = F )
+
+#Predicting Model2
+
+p1<-predict(model2, ranked)
+
+mae(p1, ranked$mental_health_days)
+mape(p1, ranked$mental_health_days)
+
+
+mae(model2, p1)
+
+
+mae(model2, ranked)
+
+mape(model2, ranked)
+
+'''
+model3 <- rpart(mental_health_days ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio, data=test_set1, control = list(maxdepth = 11, cp=0.009))
+
+summary(model3) 
+printcp(model3)
+fancyRpartPlot(model3)
+'''
+```
+
+
+```{r}
+#UCI Example
+'''
+set.seed(123)   #  set seed to ensure you always have same random numbers generated
+sample = sample.split(ranked, SplitRatio = 0.5) # splits the data in the ratio mentioned in SplitRatio. After splitting marks these rows as logical TRUE and the the remaining are marked as logical FALSE
+train_set1 =subset(ranked, sample ==TRUE)# creates a training dataset named train1 with rows which are marked as TRUE
+
+test_set1=subset(ranked, sample==FALSE)
+'''
+#Regression
+#set.seed(123)
+#train = sample(1:nrow(ranked), nrow(ranked)/2)
+
+View(ranked)
+
+set.seed(123)
+train = sample(1:nrow(ranked), nrow(ranked)/1.25)
+
+
+model_ment_helth_day_tree <- tree(mental_health_days ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio, ranked, subset=train)
+
+summary(model_ment_helth_day_tree)
+
+
+
+plot(model_ment_helth_day_tree)
+text(model_ment_helth_day_tree,pretty=0) 
+
+cv_ment_helth_day=cv.tree(model_ment_helth_day_tree)
+
+plot(cv_ment_helth_day$size,cv_ment_helth_day$dev, type='b')
+
+
+```
+
+
+
+```{r}
+#Prune Tree
+prune_model_ment_helth_day_tree=prune.tree(model_ment_helth_day_tree, best=5)
+
+summary(prune_model_ment_helth_day_tree)
+
+#cv.tree(model_ment_helth_day_tree,,prune_model_ment_helth_day_tree)$dev
+
+plot(prune_model_ment_helth_day_tree)
+text(prune_model_ment_helth_day_tree,pretty=0)
+
+
+yhat=predict(model_ment_helth_day_tree,newdata=ranked[-train,])
+test=ranked[-train,"mental_health_days"]
+
+plot(yhat,test)
+abline(0,1)
+
+mean((yhat-test)^2)
+
+```
+
+
+
+```{r}
+#Random Forest
+
+library(randomForest)
+
+set.seed(123)
+bag_ment_hlth_days=randomForest(mental_health_days ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio, data=ranked, subset=train, mtry=11, importance=TRUE)
+
+bag_ment_hlth_days
+
+
+yhat.bag = predict(bag_ment_hlth_days,newdata=ranked[-train,])
+plot(yhat.bag, test)
+abline(0,1)
+
+
+mean((yhat.bag-test)^2)
+
+importance(bag_ment_hlth_days)
+
+varImpPlot(bag_ment_hlth_days)
+
 
 ```
 
