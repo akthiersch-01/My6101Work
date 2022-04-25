@@ -1,0 +1,288 @@
+---
+title: "Regression_Tree_Modeling"
+author: "Alexander Thiersch"
+date: "4/24/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Import libraries
+library(ezids)
+library(dplyr)
+library(data.table)
+library(readr)
+library(lattice)
+library(corrplot)
+library(psych)
+library(kableExtra)
+library(ggpubr)
+
+#Regression Tree Packages
+library(rpart)
+library(rattle)
+library(pROC)
+library(tree)
+library(MASS)
+library(caTools)
+library(ModelMetrics)
+library(modelr)
+library(randomForest)
+
+
+```
+
+# Technical Analysis
+
+## Instructions
+
+Technical analysis (R code), 25% (First attempt due: Mar 28 Monday 12:30pm)
+
+Just before your team presentation, provide an R-markdown, or R script file, which shows the R-code and brief explanations as well as the rationale of the Exploratory Data Analysis of
+your project. (Also submit your data file, or give the online source url.) This submission,
+together with your final document (in part VI), will determine your team’s grade. This
+document shows a technical person the math/stat/codes that you used in your analysis.
+
+The document should include:
+
+- Summary of the dataset
+- Descriptive Statistics
+- Graphical representations of the data
+- [When applicable]  Measures of Variance / sd
+- [When applicable]  Normality tests
+- [When applicable]  Initial correlation / Chi Square tests / ANOVA analysis / Z-test or Z-interval / T-test or T-interval etc.
+
+## Summary
+
+The variables in the dataset are:
+
+* `region`: name of the US Census Bureau region (name)
+* `division`: name of the US Census Bureau division (contained with a census region)
+* `state`: state abbreviation
+* `statecode`: FIPS state code
+* `countycode`: FIPS county code
+* `fipscode`: 5-digit FIPS Code (county-level); combines `statecode` and `countycode`
+* `county`: county name
+* `year`: report release year from [County Health Rankings](https://www.countyhealthrankings.org/); range of 2016-2021
+* `county_ranked`: Indicates whether or not the county was ranked; 0=unranked, 1=ranked, or NA for aggregated national or state-level data
+* `mental_health_days`: Average number of mentally unhealthy days reported in past 30 days (age-adjusted)
+* `mental_distress_rate`: Percentage of adults reporting 14 or more days of poor mental health per month
+* `inequality`: Ratio of household income at the 80th percentile to income at the 20th percentile (Income inequality)
+* `median_inc`: The income where half of households in a county earn more and half of households earn less
+* `hs_grad`: Percentage of adults ages 25 and over with a high school diploma or equivalent
+* `college`: Percentage of adults ages 25-44 with some post-secondary education
+* `unempl`: Percentage of population ages 16 and older unemployed but seeking work
+* `child_poverty`: Percentage of people under age 18 in poverty
+* `single_parent`: Percentage of children that live in a household headed by single parent
+* `severe_housing`: Percentage of households with severe housing problems
+* `food_index`: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best)
+* `mh_providers`: rate of providers to 100,000 population
+* `pop_provider_ratio`: ratio of population to mental health providers (i.e., population served per provider)
+* `pop`: census population estimate
+* `pct_below18`: percent of population younger than 18
+* `pct_black`: percent of population that are African-American or non-Hispanic Black
+* `pct_native_am`: percent of population that are Native American or Alaska Natives
+* `pct_asian`: percent of population that are Asian
+* `pct_pacific`: percent of population that are Native Hawaiian or Other Pacific Islander
+* `pct_hispanic`: percent of population that are Hispanic
+* `pct_white`: percent of population that are non-Hispanic white or Caucasian
+* `pct_female`: percent of population that are female
+* `pct_rural`: percent of population that live in rural areas
+
+For more information, see [the measures online](https://www.countyhealthrankings.org/explore-health-rankings/measures-data-sources/2021-measures).
+
+```{r import, results='hide', echo=F}
+
+# import csv as dataframe
+dframe <- data.frame(read.csv("/Users/akthiersch/Desktop/Datasets/analytic_data_2016_2021_with_regions.csv"))
+#View(dframe)
+
+# convert variables to factor
+dframe$region <- factor(dframe$region)
+dframe$division <- factor(dframe$division)
+dframe$statecode <- factor(dframe$statecode)
+dframe$countycode <- factor(dframe$countycode)
+dframe$fipscode <- factor(dframe$fipscode)
+dframe$county_ranked <- factor(dframe$county_ranked)
+
+# check structure of data
+str(dframe)
+#summary(dframe)
+
+```
+
+```{r summary, results='hide'}
+
+# look at county_ranked var; not all counties are ranked; also some aggregated data per state and country exist in the observations
+# =1 means they are ranked, =0 means unranked, and =NA is for state/national data
+#print(summary(dframe$county_ranked))
+
+# subset of dataframe including only ranked counties
+ranked <- dframe %>% subset(county_ranked==1)
+
+# subset of dataframe including only ranked counties
+unranked <- dframe %>% subset(county_ranked==0)
+
+# subset of dataframe including only aggregated data
+aggregated <- dframe %>% subset(is.na(county_ranked))
+
+# duplicate column and rename level labels for easier reading
+ranked$region_abb <- ranked$region
+levels(ranked$region_abb) <- c("", 
+                              "MW",  # re-level factor labels
+                              "NE",
+                              "S", 
+                              "W")
+
+# subset ranked data by region
+ranked_MW <- ranked %>% subset(region=="Midwest")
+ranked_NE <- ranked %>% subset(region=="Northeast")
+ranked_SO <- ranked %>% subset(region=="South")
+ranked_WE <- ranked %>% subset(region=="West")
+
+# subset ranked data into annual datasets
+ranked16 <- ranked %>% subset(year==2016)
+ranked17 <- ranked %>% subset(year==2017)
+ranked18 <- ranked %>% subset(year==2018)
+ranked19 <- ranked %>% subset(year==2019)
+ranked20 <- ranked %>% subset(year==2020)
+ranked21 <- ranked %>% subset(year==2021)
+
+# view size of annual datasets
+df_annual_list <- list(ranked16, ranked17, ranked18, ranked19, ranked20, ranked21)
+for (df in df_annual_list) {
+  print(paste("Observations in", median(df$year), "data: ", nrow(df)))
+  
+}
+
+# sort dataframe
+ranked <- ranked[order(ranked$year, ranked$region, ranked$division, ranked$statecode, ranked$countycode), ]
+
+# view head and tail of ranked data
+xkabledplyhead(ranked, 2, title = "Table: First 2 Rows of Ranked Data")
+xkabledplytail(ranked, 2, title = "Table: Last 2 Rows of Ranked Data")
+
+```
+
+
+
+```{r}
+#View(ranked)
+#str(ranked)
+
+#Creating Train and Test Set - ranked
+set.seed(123)
+train = sample(1:nrow(ranked), nrow(ranked)/1.25)
+
+#First Model for Number of Mentally Unhealthy Days (ranked; all vars.)
+model_ment_helth_day_tree <- rpart(mental_health_days ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio + region, ranked, subset=train, control = list(maxdepth=30, cp=0.002))
+
+#Summary for Number of Mentally Unhealthy Days
+summ_table1<-summary(model_ment_helth_day_tree)
+summ_table1$variable.importance
+
+#Plot Regression Tree
+#rpart.plot(model_ment_helth_day_tree)
+fancyRpartPlot(model_ment_helth_day_tree, main = "Model 1 - Target y: mental_health_days (all vars.)")
+
+#Print Complexity Penalty
+printcp(model_ment_helth_day_tree)
+
+#Plotting Complexity Parameters
+plotcp(model_ment_helth_day_tree, minline = TRUE, lty = 3, col = 1)
+
+```
+
+
+
+```{r}
+#Prune Tree
+
+#Prune Tree Model
+#prune_model_ment_helth_day_tree=prune.rpart(model_ment_helth_day_tree, cp=0.209, best=5)
+
+prune_model_ment_helth_day_tree=prune.rpart(model_ment_helth_day_tree, cp=model_ment_helth_day_tree$cptable[which.min(model_ment_helth_day_tree$cptable[,"xerror"]),"CP"], best=5)
+
+
+#Summary of Pruned Tree
+summ_table2<-summary(prune_model_ment_helth_day_tree)
+summ_table2$variable.importance
+#Print Complexity Penalty of Prune Tree
+printcp(prune_model_ment_helth_day_tree)
+
+#Plot Complexity Penalty of Prune Tree 
+plotcp(prune_model_ment_helth_day_tree,minline = TRUE, lty = 3, col = 1)
+
+#Plot Pruned Tree
+fancyRpartPlot(prune_model_ment_helth_day_tree)
+
+```
+
+```{r}
+#Predicting and MSE for Regression Trees
+
+#Prediction/Testing - Original Model
+yhat=predict(model_ment_helth_day_tree,newdata=ranked[-train,])
+test=ranked[-train,"mental_health_days"]
+
+plot(yhat,test, main="Regression Tree: Test vs. Predicted Values", xlab="Predicted Values", ylab="Test Values")
+abline(0,1)
+
+#MSE
+mean((yhat-test)^2)
+
+#RMSE
+sqrt(mean((yhat-test)^2))
+
+
+#Prediction/Testing - Pruned Model
+yhat_prune=predict(prune_model_ment_helth_day_tree,newdata=ranked[-train,])
+test=ranked[-train,"mental_health_days"]
+
+plot(yhat_prune,test, main="Pruned Regression Tree: Test vs. Predicted Values", xlab="Predicted Values", ylab="Test Values")
+abline(0,1)
+
+#MSE
+mean((yhat_prune-test)^2)
+
+#RMSE
+sqrt(mean((yhat_prune-test)^2))
+
+
+```
+
+
+```{r}
+#Random Forest
+
+library(randomForest)
+
+#Generate Random Forest Model - Num. of Mentally Unhealthy Days (all vars.)
+set.seed(123)
+bag_ment_hlth_days=randomForest(mental_health_days ~ inequality + median_inc + hs_grad + college + unempl + child_poverty + single_parent + severe_housing + food_index + mh_providers + pop_provider_ratio + region, data=ranked, subset=train, mtry=11, importance=TRUE)
+
+bag_ment_hlth_days
+
+#Predict/Test Random Forest Model
+yhat.bag = predict(bag_ment_hlth_days,newdata=ranked[-train,])
+plot(yhat.bag, test, main="Random Forest: Test vs. Predicted Values", xlab="Predicted Values", ylab="Test Values")
+abline(0,1)
+
+#MSE
+mean((yhat.bag-test)^2)
+
+#RMSE
+sqrt(mean((yhat.bag-test)^2))
+
+
+#Determine Variable Importance
+importance(bag_ment_hlth_days)
+
+#Plot Variable Importance 
+varImpPlot(bag_ment_hlth_days, main = "Variable Importance Plots for Random Forest")
+
+```
+
